@@ -33,22 +33,30 @@ class DBManager
         return $this->connection;
     }
 
-    /**
-     * Method responsible for prepare a query sql.
-     * 
-     * @param string $query The sql query that will be executed.
-     * @return mysqli_stmt $stmt A statement object prepared.
-     */
-    public function queryPrepare(string $query): mysqli_stmt
+    public function queryExecute(string $sqlQuery): mysqli_result
     {
-        $stmt = mysqli_prepare($this->connection, $query);
-        return $stmt ? $stmt : die("An error has occured during query prepare: " . mysqli_error($this->connection));
+        return mysqli_query($this->connection, $sqlQuery);
+    }
+
+    public function queryPrepare(string $sqlQuery): mysqli_stmt
+    {
+        $stmt = mysqli_prepare($this->connection, $sqlQuery);
+
+        if (!$stmt) {
+            throw new Exception(
+                "An error occurred during SQL query prepare: " . mysqli_error($this->connection)
+            );
+        }
+
+        return $stmt;
     }
 
     private function verifyConnection()
     {
         if (!$this->connection) {
-            die("Cannot stablish " . Constants::DB_NAME . " db connection by error: " . mysqli_connect_error());
+            throw new Exception(
+                "Cannot stablish " . Constants::DB_NAME . " database connection by error: " . mysqli_connect_error()
+            );
         }
     }
 }
