@@ -12,7 +12,7 @@ class Language
 
     public function __construct($id = null, $name = null, $isoCode = null)
     {
-        
+
         if ($id != null) {
             $this->id = $id;
         }
@@ -41,7 +41,7 @@ class Language
         return $listData;
     }
 
-    public function getById(): ?Language
+    public function getById(): mixed
     {
         $dbManager = new DBManager();
         $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_ID));
@@ -56,10 +56,11 @@ class Language
                 $languageSaved = new Language($row[self::COLUMN_ID], $row[self::COLUMN_NAME], $row[self::COLUMN_ISO_CODE]);
                 break;
             }
+        } else {
+            $languageSaved = false;
         }
-        $stmt->close();
-        $dbManager->closeConnection();
-        unset($dbManager);
+        
+        $this->cleanConnection($stmt, $dbManager);
 
         return $languageSaved;
     }
@@ -74,9 +75,7 @@ class Language
 
         $languageSaved = ($result->num_rows > 0) ? true : false;
 
-        $stmt->close();
-        $dbManager->closeConnection();
-        unset($dbManager);
+        $this->cleanConnection($stmt, $dbManager);
 
         return $languageSaved;
     }
@@ -91,9 +90,35 @@ class Language
 
         $saved = ($stmt->affected_rows > 0) ? true : false;
 
-        $stmt->close();
-        $dbManager->closeConnection();
-        unset($dbManager);
+        $this->cleanConnection($stmt, $dbManager);
+
+        return $saved;
+    }
+
+    public function update(): bool
+    {
+        $dbManager = new DBManager();
+        $stmt = $dbManager->queryPrepare($this->updateQuery());
+        $stmt->bind_param('ssi', $this->name, $this->isoCode, $this->id);
+        $stmt->execute();
+
+        $updated = ($stmt->affected_rows > 0) ? true : false;
+
+        $this->cleanConnection($stmt, $dbManager);
+
+        return $updated;
+    }
+
+    public function delete(): bool
+    {
+        $dbManager = new DBManager();
+        $stmt = $dbManager->queryPrepare($this->deleteQuery());
+        $stmt->bind_param('i', $this->id);
+        $stmt->execute();
+
+        $saved = ($stmt->affected_rows > 0) ? true : false;
+
+        $this->cleanConnection($stmt, $dbManager);
 
         return $saved;
     }
@@ -158,6 +183,13 @@ class Language
         return $this;
     }
 
+    private function cleanConnection(mysqli_stmt $statement, DBManager $dbManager)
+    {
+        $statement->close();
+        $dbManager->closeConnection();
+        unset($dbManager);
+    }
+
     private function selectAllQuery(): string
     {
         return "SELECT " . self::COLUMN_ID . "," . self::COLUMN_NAME . "," . self::COLUMN_ISO_CODE . " FROM " . self::TABLE_NAME;
@@ -171,5 +203,15 @@ class Language
     private function insertQuery(): string
     {
         return "INSERT INTO " . self::TABLE_NAME . "(" .  self::COLUMN_NAME . "," . self::COLUMN_ISO_CODE . ") VALUES (?,?)";
+    }
+
+    private function updateQuery(): string
+    {
+        return "UPDATE " . self::TABLE_NAME . " SET " .  self::COLUMN_NAME . "= ? ," . self::COLUMN_ISO_CODE . "= ? WHERE " . self::COLUMN_ID . "= ?";
+    }
+
+    private function deleteQuery(): string
+    {
+        return "DELETE FROM " . self::TABLE_NAME . " WHERE " . self::COLUMN_ID . "= ?";
     }
 }

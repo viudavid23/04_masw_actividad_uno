@@ -12,7 +12,7 @@ require_once('../../controllers/LanguageController.php')
 
 <body>
     <div class="col-12">
-        <h2 class="h2">Idiomas</h2>
+        <h2 class="h2">Listado de Idiomas</h2>
         <div class="btn-group mb-3" role="group" aria-label="Buttons Area">
             <a class="btn btn-primary" href="create.php">Registrar</a>
         </div>
@@ -43,7 +43,7 @@ require_once('../../controllers/LanguageController.php')
 
                             <td>
                                 <div class="btn-group" role="group" aria-label="Buttons Area">
-                                    <a class="btn btn-success" href="edit.php?languageId=<?php echo $item->getId(); ?>&edited=false">Editar</a>
+                                    <a class="btn btn-success" href="edit.php?id=<?php echo $item->getId(); ?>">Editar</a>
                                 </div>
                                 <div class="btn-group" role="group" aria-label="Buttons Area">
                                     <form name="delete_language" action="delete.php" method="POST">

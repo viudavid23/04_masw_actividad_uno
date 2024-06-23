@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <?php
+require_once '../../controllers/LanguageController.php';
+
+$controller = new LanguageController();
 
 $sendData = false;
 
-if (isset($_POST['createBtn'])) {
+$languageId = $_GET['id'];
+
+if (isset($_POST['editBtn'])) {
     $sendData = true;
 }
 if ($sendData) {
 
-    require_once '../../controllers/LanguageController.php';
-
-    $controller = new LanguageController();
-
-    $controller->create($_POST['name'], $_POST['iso']);
+    $controller->edit($languageId, $_POST['name'], $_POST['iso']);
 }
 
 ?>
@@ -26,18 +27,35 @@ if ($sendData) {
 
 <body class="container">
 
-    <form name="create_kind" action="" method="POST">
-        <h2 class="h2">Registro de Idiomas</h2>
+    <form name="edit_language" action="" method="POST">
+        <h2 class="h2">Edición de Idiomas</h2>
         <div class="btn-group" role="group" aria-label="Buttons Area">
             <a class="btn btn-link" href="list.php">Volver al listado de Idiomas</a>
         </div>
 
         <?php
-        if (!$sendData) {
+
+        $languageSaved = $controller->showById($languageId);
+
+        if (!$languageSaved) {
+            if (isset($_SESSION['error_message'])) {
         ?>
+                <div class="row">
+                    <div class="alert alert-danger" role="alert">
+                        <?php echo $_SESSION['error_message'] ?>
+                    </div>
+                </div>
+            <?php
+                unset($_SESSION['error_message']);
+            }
+            exit;
+        }
+
+        if (!$sendData) {
+            ?>
             <div class="row">
                 <div class="alert alert-info" role="alert">
-                    Diligencie los campos para registrar un nuevo idioma.
+                    Actualice los campos para editar el idioma.
                 </div>
             </div>
             <?php
@@ -47,7 +65,7 @@ if ($sendData) {
             ?>
                 <div class="row">
                     <div class="alert alert-danger" role="alert">
-                        <?php echo $_SESSION['error_message'] ?> <br><a href="create.php">Volver Intentarlo</a>
+                        <?php echo $_SESSION['error_message'] ?> <br><a href="edit.php?id=<?php echo $languageId; ?>">Volver Intentarlo</a>
                     </div>
                 </div>
             <?php
@@ -58,7 +76,7 @@ if ($sendData) {
             ?>
                 <div class="row">
                     <div class="alert alert-warning" role="alert">
-                        <?php echo $_SESSION['warning_message'] ?> <br><a href="create.php">Volver Intentarlo</a>
+                        <?php echo $_SESSION['warning_message'] ?> <br><a href="edit.php?id=<?php echo $languageId; ?>">Volver Intentarlo</a>
                     </div>
                 </div>
             <?php
@@ -80,18 +98,24 @@ if ($sendData) {
         ?>
         <div class="row mb-3">
             <div class="col">
+                <label class="form-label">Id:</label>
+                <input type="text" class="form-control" name="id" value="<?php echo $languageId ?>" disabled>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
                 <label class="form-label">Nombre:</label>
-                <input type="text" class="form-control" name="name" placeholder="Inglés" pattern="[a-zA-ZÀ-ÿ\s]+" title="Nombre inválido." required>
+                <input type="text" class="form-control" name="name" placeholder="Inglés" pattern="[a-zA-ZÀ-ÿ\s]+" title="Nombre inválido." value="<?php echo $languageSaved->getName(); ?>" required>
             </div>
         </div>
         <div class="row mb-3">
             <div class="col">
                 <label class="form-label">Código ISO:</label>
-                <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[A-Z0-9]{2,3}" title="Código ISO inválido." required>
+                <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[A-Z0-9]{2,3}" title="Código ISO inválido." value="<?php echo $languageSaved->getIsoCode(); ?>" required>
             </div>
         </div>
         <div>
-            <button type="submit" class="btn btn-primary" name="createBtn">Guardar</button>
+            <button type="submit" class="btn btn-primary" name="editBtn">Editar</button>
             <a href="list.php" class="btn btn-danger">Cancelar</a>
         </div>
     </form>
