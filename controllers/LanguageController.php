@@ -1,5 +1,5 @@
 <?php
-require_once '../../utils/session_start.php';
+require_once '../../utils/SessionStart.php';
 require_once('validations/LanguageValidation.php');
 require_once('../../models/Language.php');
 class LanguageController
@@ -20,6 +20,7 @@ class LanguageController
     function create($name, $isoCode): bool
     {
         $languageSaved = false;
+        $name = strtoupper($name);
         $isoCode = strtoupper($isoCode);
         $inputInvalid = $this->validInputFields($name, $isoCode);
 
