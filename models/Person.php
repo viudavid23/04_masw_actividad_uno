@@ -106,11 +106,11 @@ class Person
         $stmt->bind_param('i', $this->id);
         $stmt->execute();
 
-        $saved = ($stmt->affected_rows > 0) ? true : false;
+        $deleted = ($stmt->affected_rows > 0) ? true : false;
 
         $this->cleanConnection($stmt, $dbManager);
 
-        return $saved;
+        return $deleted;
     }
 
     /**
