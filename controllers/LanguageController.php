@@ -28,7 +28,7 @@ class LanguageController
         $languageSaved = $model->getById();
 
         if (!$languageSaved) {
-            $_SESSION['error_message'] = "Idioma inválido";
+            $_SESSION['error_message'] = "Idioma [{$id}] no registrado";
             error_log("Database exception: ID de idioma no encontrado en la base de datos - [{$id}]");
             return false;
         }
@@ -109,7 +109,7 @@ class LanguageController
         $languageSaved = $model->getById();
 
         if (!$languageSaved) {
-            $_SESSION['warning_message'] = "Idioma no registrado";
+            $_SESSION['warning_message'] = "Idioma [{$id}] no registrado";
             error_log("Database exception: ID de idioma no encontrado en la base de datos - [{$id}]");
             return $languageDeleted;
         }
@@ -170,7 +170,7 @@ class LanguageController
     function validateIdType($id): bool
     {
         if (LanguageValidation::validateIdDataType($id)) {
-            $_SESSION['error_message'] = "Idioma inválido";
+            $_SESSION['error_message'] = "Idioma [{$id}] inválido";
             error_log("Validation exception: ID de idioma inválido. Debe contener solo números - [{$id}]");
             return false;
         }

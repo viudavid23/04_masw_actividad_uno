@@ -56,7 +56,6 @@ class Language
                 break;
             }
         } else {
-            error_log("Database exception: No se ha encontrado idioma registrado - Id [{$this->id}]");
             $languageSaved = false;
         }
 

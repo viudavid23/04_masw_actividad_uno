@@ -29,7 +29,7 @@ class PlatformController
         $platformSaved = $model->getById();
 
         if (!$platformSaved) {
-            $_SESSION['error_message'] = "Plataforma [{$id}] inválida";
+            $_SESSION['error_message'] = "Plataforma [{$id}] no registrada";
             error_log("Database exception: ID de la plataforma no encontrado en la base de datos - [{$id}]");
             return false;
         }

@@ -125,7 +125,7 @@ class DirectorController extends PersonController
         $directorDeleted = $model->getById();
 
         if (!$directorDeleted) {
-            $_SESSION['warning_message'] = "Director [{$id}] no encontrado";
+            $_SESSION['warning_message'] = "Director [{$id}] no registrado";
             error_log("Database exception: ID del director no encontrado en la base de datos - [{$id}]");
             return $directorDeleted;
         }
@@ -156,7 +156,7 @@ class DirectorController extends PersonController
 
     private function handlePersonEditedMessage(bool $personEdited){
         if ($personEdited) {
-            $_SESSION['success_message'] = 'Director y Datos Personales se han actulizado correctamente';
+            $_SESSION['success_message'] = 'Director y Datos Personales se han actualizado correctamente';
         } else {
             $_SESSION['error_message'] = 'Director actualizado, pero los datos personales no se han actualizado correctamente.';
         }
@@ -165,6 +165,7 @@ class DirectorController extends PersonController
     private function hasValidDirectorIdType($id): bool
     {
         if (DirectorValidation::validateIdDataType($id)) {
+            $_SESSION['error_message'] = "Director [{$id}] inválido";
             error_log("Validation exception: ID del director inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
             return false;
         }

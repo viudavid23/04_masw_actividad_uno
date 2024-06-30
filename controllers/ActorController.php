@@ -32,7 +32,7 @@ class ActorController extends PersonController
         $actorSaved = $model->getById();
 
         if (!$actorSaved) {
-            $_SESSION['error_message'] = "Actor/Actriz no encontrado/a";
+            $_SESSION['error_message'] = "Actor/Actriz [{$id}] no registrado/a";
             error_log("Database exception: ID del actor/actriz no encontrado en la base de datos - [{$id}]");
             return false;
         }
@@ -124,7 +124,7 @@ class ActorController extends PersonController
         $actorDeleted = $model->getById();
 
         if (!$actorDeleted) {
-            $_SESSION['warning_message'] = "Actor/Actriz no encontrado";
+            $_SESSION['warning_message'] = "Actor/Actriz [{$id}] no registrado";
             error_log("Database exception: ID del actor/actriz no encontrada en la base de datos - [{$id}]");
             return $actorDeleted;
         }
@@ -164,6 +164,7 @@ class ActorController extends PersonController
     private function hasValidActorIdType($id): bool
     {
         if (ActorValidation::validateIdDataType($id)) {
+            $_SESSION['error_message'] = "Actor/Actriz [{$id}] inválido";
             error_log("Validation exception: ID del actor/actriz inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
             return false;
         }
