@@ -136,7 +136,7 @@ class PersonController
             $inputInvalid = true;
         }
 
-        if (CommonValidation::isInvalidDate($personData['birthdate'])) {
+        if (empty($personData['birthdate']) || CommonValidation::isInvalidDate($personData['birthdate'])) {
             error_log("Validation exception: Fecha de nacimiento vacia o no cumple con un formato de fecha aceptado  - [{$personData['birthdate']}]");
             $inputInvalid = true;
         }

@@ -14,7 +14,7 @@
     <?php include('../../menu.php'); ?>
         
         <div class="col-12">
-            <h2 class="h2">Listado de Actores</h2>
+            <h2 class="h2">Listado de Actores/Actrices</h2>
             <div class="btn-group mb-3" role="group" aria-label="Buttons Area">
                 <a class="btn btn-primary" href="create.php">Registrar</a>
             </div>

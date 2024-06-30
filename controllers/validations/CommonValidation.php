@@ -8,9 +8,6 @@ class CommonValidation
      */
     public static function isInvalidDate($date, $formats = ['Y-m-d', 'd/m/Y', 'm-d-Y', 'Y-m-d H:i:s'])
     {
-        if (empty($date)) {
-            return true;
-        }
 
         foreach ($formats as $format) {
             $d = DateTime::createFromFormat($format, $date);

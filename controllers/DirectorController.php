@@ -3,8 +3,8 @@ require_once '../../utils/SessionStart.php';
 require_once('../../models/Director.php');
 require_once('../../utils/Constants.php');
 require_once '../../utils/Utilities.php';
-require_once('validations/DirectorValidation.php');
 require_once('validations/CommonValidation.php');
+require_once('validations/DirectorValidation.php');
 require_once('PersonController.php');
 
 class DirectorController extends PersonController
@@ -175,7 +175,7 @@ class DirectorController extends PersonController
     {
         $inputInvalid = false;
 
-        if (CommonValidation::isInvalidDate($directorData['beginningCareer'])) {
+        if (empty($directorData['beginningCareer']) || CommonValidation::isInvalidDate($directorData['beginningCareer'])) {
             error_log("Validation exception: Fecha de inicio de carrera vacia o no cumple con un formato de fecha aceptado  - [{$directorData['beginningCareer']}]");
             $inputInvalid = true;
         }

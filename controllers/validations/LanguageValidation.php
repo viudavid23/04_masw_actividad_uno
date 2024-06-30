@@ -1,8 +1,6 @@
 <?php
 class LanguageValidation {
-    /**
-     * 
-     */
+    
     public static function validateName($name): bool {
         return empty($name) || !preg_match('/^[\p{L}]+(?:[\s]*[\p{L}]+)*$/u', $name);
     }
