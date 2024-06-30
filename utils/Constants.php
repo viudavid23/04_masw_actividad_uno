@@ -8,4 +8,5 @@ class Constants
     const DATE_INPUT_FORMAT = 'Y-m-d';
     const DATE_OUTPUT_FORMAT = 'd/m/Y';
     const BIOGRAPHY_LENGTH = 5000;
+    const SYNOPSIS_LENGTH = 1000;
 }
