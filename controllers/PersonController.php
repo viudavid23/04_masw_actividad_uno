@@ -8,7 +8,7 @@ class PersonController
 {
     function showPersonById($id): mixed
     {
-        if (!$this->validatePersonIdType($id)) {
+        if (!$this->hasValidPersonIdType($id)) {
             return false;
         }
 
@@ -84,7 +84,7 @@ class PersonController
     {
         $personDeleted = false;
 
-        if (!$this->validatePersonIdType($id)) {
+        if (!$this->hasValidPersonIdType($id)) {
             return $personDeleted;
         }
 
@@ -106,7 +106,7 @@ class PersonController
         return $personDeleted;
     }
 
-    protected function validatePersonIdType($id): bool
+    protected function hasValidPersonIdType($id): bool
     {
         if (PersonValidation::validateIdDataType($id)) {
             error_log("Validation exception: ID de la persona inválido. Debe contener solo números y ser mayor a cero - [{$id}]");

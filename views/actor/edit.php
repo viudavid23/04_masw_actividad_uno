@@ -33,7 +33,11 @@ if ($sendData) {
         'countryId' => $_POST['nationality']
     ];
 
-    $actorController->editActor($actorSaved->getId(), $actorData, $personData);
+    $actorEdited = $actorController->editActor($actorSaved->getId(), $actorData, $personData);
+
+    if ($actorEdited) {
+        $actorSaved = $actorController->showActorById($actorId);
+    }
 }
 
 ?>
