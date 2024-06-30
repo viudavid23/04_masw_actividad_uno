@@ -255,7 +255,7 @@ class Actor
     private function isDataDifferent($currentData): bool
     {
         return strtolower($currentData->getStageName()) !== strtolower($this->getStageName()) ||
-            $currentData->getBiography() !== $this->getBiography() ||
+        strtolower($currentData->getBiography()) !== strtolower($this->getBiography()) ||
             $currentData->getAwards() !== $this->getAwards() ||
             $currentData->getHeight() !== $this->getHeight() ||
             $currentData->getPersonId() !== $this->getPersonId();
