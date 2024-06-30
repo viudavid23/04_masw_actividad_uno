@@ -15,7 +15,7 @@
         require_once '../../controllers/ActorController.php';
         ?>
         <div class="col-12">
-            <h2 class="h2">Eliminación de Actores</h2>
+            <h2 class="h2">Eliminación de Actores/Actrices</h2>
             <?php
 
             $id = $_POST['actorId'];
@@ -51,7 +51,7 @@
             ?>
                 <div class="row">
                     <div class="alert alert-success" role="alert">
-                        <?php echo $_SESSION['success_message'] ?> <br><a class="btn btn-link" href="list.php">Volver al listado de Actores</a>
+                        <?php echo $_SESSION['success_message'] ?> <br><a class="btn btn-link" href="list.php">Volver al listado de Actores/Actrices</a>
                     </div>
                 </div>
             <?php

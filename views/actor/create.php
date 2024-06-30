@@ -45,14 +45,14 @@ if ($sendData) {
 
         <?php include('../../menu.php'); ?>
 
-        <form class="row g-3" name="create_language" action="" method="POST">
-            <h2 class="h2">Registro de Actores</h2>
+        <form class="row g-3" name="create_actor" action="" method="POST">
+            <h2 class="h2">Registro de Actores/Actrices</h2>
             <?php
             if (!$sendData) {
             ?>
                 <div class="row">
                     <div class="alert alert-info" role="alert">
-                        Diligencie los campos para registrar un nuevo actor.
+                        Diligencie los campos para registrar un/a nuevo/a actor/actriz.
                     </div>
                 </div>
                 <?php

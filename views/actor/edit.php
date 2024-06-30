@@ -95,7 +95,7 @@ if ($sendData) {
                 ?>
                 <div class="row">
                     <div class="alert alert-info" role="alert">
-                        Diligencie los campos para editar un nuevo actor.
+                        Diligencie los campos para editar el/a actor/actriz.
                     </div>
                 </div>
                 <?php
