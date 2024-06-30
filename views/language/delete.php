@@ -28,7 +28,7 @@
             ?>
                 <div class="row">
                     <div class="alert alert-danger" role="alert">
-                        <?php echo $_SESSION['error_message'] ?> <br><a class="btn btn-link" href="list.php">Volver a intentarlo</a>
+                        <?php echo $_SESSION['error_message'] ?> <br><a class="btn btn-link" href="list.php">Volver al Listado de Idiomas</a>
                     </div>
                 </div>
             <?php

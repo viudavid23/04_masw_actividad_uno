@@ -56,9 +56,10 @@ class Language
                 break;
             }
         } else {
+            error_log("Database exception: No se ha encontrado idioma registrado - Id [{$this->id}]");
             $languageSaved = false;
         }
-        
+
         $this->cleanConnection($stmt, $dbManager);
 
         return $languageSaved;
@@ -97,6 +98,20 @@ class Language
     public function update(): bool
     {
         $dbManager = new DBManager();
+
+        $languageSaved = $this->getById($this->id);
+
+        if (!$this->isDataDifferent($languageSaved)) {
+            return true;
+        }
+
+        $alreadySaved = $this->getByIsoCode($this->getIsoCode());
+
+        if ($alreadySaved) {
+            error_log("Database exception: El ISO Code se encuentra asociado a otro idioma - ISO Code [{$this->isoCode}]");
+            return false;
+        }
+
         $stmt = $dbManager->queryPrepare($this->updateQuery());
         $stmt->bind_param('ssi', $this->name, $this->isoCode, $this->id);
         $stmt->execute();
@@ -180,6 +195,12 @@ class Language
         $this->isoCode = $isoCode;
 
         return $this;
+    }
+
+    private function isDataDifferent($currentData): bool
+    {
+        return strtolower($currentData->getName()) !== strtolower($this->getName()) ||
+            strtolower($currentData->getIsoCode()) !== strtolower($this->getIsoCode());
     }
 
     private function cleanConnection(mysqli_stmt $statement, DBManager $dbManager)

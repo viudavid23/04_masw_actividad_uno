@@ -33,16 +33,26 @@ class LanguageController
             return false;
         }
 
-        return $languageSaved;
+        $language = new Language(
+            $languageSaved->getId(),
+            ucfirst(Utilities::convertCharacters(0, $languageSaved->getName())),
+            $languageSaved->getIsoCode()
+        );
+
+        return $language;
     }
     
     function create($name, $isoCode): bool
     {
         $languageSaved = false;
+
+        $name = trim($name);
+        $isoCode = trim($isoCode);
+
         $name = strtoupper($name);
         $isoCode = strtoupper($isoCode);
 
-        if ($this->validateInvalidInputFields($name, $isoCode)) {
+        if ($this->validateInvalidInputFields($name, $isoCode, true)) {
             return $languageSaved;
         }
 
@@ -62,9 +72,14 @@ class LanguageController
     function edit($id, $name, $isoCode): bool
     {
         $languageEdited = false;
+
+        $name = trim($name);
+        $isoCode = trim($isoCode);
+        
+        $name = strtoupper($name);
         $isoCode = strtoupper($isoCode);
 
-        if (!$this->validateIdType($id) || $this->validateInvalidInputFields($name, $isoCode)) {
+        if (!$this->validateIdType($id) || $this->validateInvalidInputFields($name, $isoCode, false)) {
             return $languageEdited;
         }
 
@@ -119,7 +134,7 @@ class LanguageController
         return $languageExist;
     }
 
-    function validateInvalidInputFields($name, $isoCode): bool
+    function validateInvalidInputFields($name, $isoCode, $create): bool
     {
         $inputInvalid = false;
         $inputAlreadyRegister = false;
@@ -139,13 +154,16 @@ class LanguageController
             return $inputInvalid;
         }
 
-        $inputAlreadyRegister = $this->checkByIsoCode($isoCode);
+        if($create){
+            $inputAlreadyRegister = $this->checkByIsoCode($isoCode);
 
-        if ($inputAlreadyRegister) {
-            $_SESSION['warning_message'] = "Ya existe un idioma registrado para el ISO Code [{$isoCode}]";
-            error_log("Database exception: El idioma ya se encuentran registrado - Nombre [{$name}] ISO Code [{$isoCode}]");
-            $inputInvalid = true;
+            if ($inputAlreadyRegister) {
+                $_SESSION['warning_message'] = "Ya existe un idioma registrado para el ISO Code [{$isoCode}]";
+                error_log("Database exception: El idioma ya se encuentran registrado - Nombre [{$name}] ISO Code [{$isoCode}]");
+                $inputInvalid = true;
+            }
         }
+       
 
         return $inputInvalid;
     }

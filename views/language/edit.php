@@ -3,18 +3,24 @@
 require_once '../../utils/SessionStart.php';
 require_once '../../controllers/LanguageController.php';
 
-$sendData = false;
-
 $controller = new LanguageController();
 
+$sendData = false;
+
 $languageId = $_GET['id'];
+
+$languageSaved = $controller->showById($languageId);
 
 if (isset($_POST['editBtn'])) {
     $sendData = true;
 }
 if ($sendData) {
 
-    $controller->edit($languageId, $_POST['name'], $_POST['iso']);
+    $languageEdited = $controller->edit($languageId, $_POST['name'], $_POST['iso']);
+
+    if ($languageEdited) {
+        $languageSaved = $controller->showById($languageId);
+    }
 }
 
 ?>
@@ -24,25 +30,25 @@ if ($sendData) {
     <meta charset="UTF-8">
     <title>Idiomas</title>
     <link href="../../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../assets/css/styles.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="container">
-        
+
         <?php include('../../menu.php'); ?>
-        
+
         <form name="edit_language" action="" method="POST">
             <h2 class="h2">Edición de Idiomas</h2>
             <?php
 
-            $languageSaved = $controller->showById($languageId);
+            if (is_bool($languageSaved)) {
 
-            if (!$languageSaved) {
                 if (isset($_SESSION['error_message'])) {
             ?>
                     <div class="row">
                         <div class="alert alert-danger" role="alert">
-                            <?php echo $_SESSION['error_message'] ?>
+                            <?php echo $_SESSION['error_message'] ?> <br><a href="list.php">Volver al listado de Idiomas</a>
                         </div>
                     </div>
                 <?php
@@ -111,7 +117,7 @@ if ($sendData) {
             <div class="row mb-3">
                 <div class="col">
                     <label class="form-label">Código ISO:</label>
-                    <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[A-Z0-9]{2,3}" title="Código ISO inválido." value="<?php echo $languageSaved->getIsoCode(); ?>" required>
+                    <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[a-zA-Z0-9]{2,3}" title="Código ISO inválido." value="<?php echo $languageSaved->getIsoCode(); ?>" required>
                 </div>
             </div>
             <div>
