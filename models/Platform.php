@@ -66,7 +66,6 @@ class Platform
                 break;
             }
         } else {
-            error_log("Database exception: No se ha encontrado plataforma registrada - Id [{$this->id}]");
             $platformSaved = false;
         }
 
