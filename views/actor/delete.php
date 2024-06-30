@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Idiomas</title>
+    <title>Actores</title>
     <link href="../../assets/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -12,17 +12,17 @@
     <div class="container">
         <?php
         include '../../menu.php';
-        require_once '../../controllers/LanguageController.php';
+        require_once '../../controllers/ActorController.php';
         ?>
         <div class="col-12">
-            <h2 class="h2">Eliminación de Idiomas</h2>
+            <h2 class="h2">Eliminación de Actores</h2>
             <?php
 
-            $id = $_POST['languageId'];
+            $id = $_POST['actorId'];
 
-            $languageController = new LanguageController();
+            $actorController = new ActorController();
 
-            $languageList = $languageController->delete($id);
+            $actorController->deleteActor($id);
 
             if (isset($_SESSION['error_message'])) {
             ?>
@@ -51,7 +51,7 @@
             ?>
                 <div class="row">
                     <div class="alert alert-success" role="alert">
-                        <?php echo $_SESSION['success_message'] ?> <br><a class="btn btn-link" href="list.php">Volver al listado de Idiomas</a>
+                        <?php echo $_SESSION['success_message'] ?> <br><a class="btn btn-link" href="list.php">Volver al listado de Actores</a>
                     </div>
                 </div>
             <?php

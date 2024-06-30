@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<?php
-require_once('../../controllers/LanguageController.php')
-?>
+<?php require_once '../../utils/SessionStart.php'; ?>
 <html>
 
 <head>
@@ -12,13 +10,18 @@ require_once('../../controllers/LanguageController.php')
 
 <body>
     <div class="container">
-        <?php include('../../menu.php'); ?>
+
+        <?php include '../../menu.php'; ?>
+
         <div class="col-12">
             <h2 class="h2">Listado de Idiomas</h2>
             <div class="btn-group mb-3" role="group" aria-label="Buttons Area">
                 <a class="btn btn-primary" href="create.php">Registrar</a>
             </div>
             <?php
+
+            require_once '../../controllers/LanguageController.php';
+
             $languageController = new LanguageController();
 
             $languageList = $languageController->showAll();
@@ -26,40 +29,41 @@ require_once('../../controllers/LanguageController.php')
             if (count($languageList) > 0) {
 
             ?>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Código ISO</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($languageList as $item) {
+                            ?>
+                                <tr>
+                                    <td><?php echo $item->getId() ?></td>
+                                    <td><?php echo $item->getName() ?></td>
+                                    <td><?php echo $item->getIsoCode() ?></td>
 
-                <table class="table">
-                    <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                        <th>Código ISO</th>
-                        <th></th>
-                    </thead>
-                    <tbody>
-                        <?php
-                        foreach ($languageList as $item) {
-                        ?>
-                            <tr>
-                                <td><?php echo $item->getId() ?></td>
-                                <td><?php echo $item->getName() ?></td>
-                                <td><?php echo $item->getIsoCode() ?></td>
-
-                                <td>
-                                    <div class="btn-group" role="group" aria-label="Buttons Area">
-                                        <a class="btn btn-success" href="edit.php?id=<?php echo $item->getId(); ?>">Editar</a>
-                                    </div>
-                                    <div class="btn-group" role="group" aria-label="Buttons Area">
-                                        <form name="delete_language" action="delete.php" method="POST">
-                                            <input type="hidden" name="languageId" value="<?php echo $item->getId(); ?>" />
-                                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                                    <td>
+                                        <div class="btn-group" role="group" aria-label="Buttons Area">
+                                            <a class="btn btn-success" href="edit.php?id=<?php echo $item->getId(); ?>">Editar</a>
+                                        </div>
+                                        <div class="btn-group" role="group" aria-label="Buttons Area">
+                                            <form name="delete_language" action="delete.php" method="POST">
+                                                <input type="hidden" name="languageId" value="<?php echo $item->getId(); ?>" />
+                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php
             } else {
             ?>

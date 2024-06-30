@@ -1,7 +1,8 @@
 <?php
 require_once '../../utils/SessionStart.php';
-require_once('validations/LanguageValidation.php');
+require_once '../../utils/Utilities.php';
 require_once('../../models/Language.php');
+require_once('validations/LanguageValidation.php');
 class LanguageController
 {
 
@@ -11,30 +12,48 @@ class LanguageController
         $languageList = $model->getAll();
         $languageObjectArray = [];
         foreach ($languageList as $item) {
-            $languageObject = new Language($item->getId(), $item->getName(), $item->getIsoCode());
+            $languageObject = new Language($item->getId(), ucfirst(Utilities::convertCharacters(0, $item->getName())), $item->getIsoCode());
             array_push($languageObjectArray, $languageObject);
         }
         return $languageObjectArray;
     }
 
+    function showById($id): mixed
+    {
+        if (!$this->validateIdType($id)) {
+            return false;
+        }
+
+        $model = new Language($id);
+        $languageSaved = $model->getById();
+
+        if (!$languageSaved) {
+            $_SESSION['error_message'] = "Idioma inválido";
+            error_log("Database exception: ID de idioma no encontrado en la base de datos - [{$id}]");
+            return false;
+        }
+
+        return $languageSaved;
+    }
+    
     function create($name, $isoCode): bool
     {
         $languageSaved = false;
         $name = strtoupper($name);
         $isoCode = strtoupper($isoCode);
-        $inputInvalid = $this->validInputFields($name, $isoCode);
 
-        if (!$inputInvalid) {
+        if ($this->validateInvalidInputFields($name, $isoCode)) {
+            return $languageSaved;
+        }
 
-            $model = new Language(null, $name, $isoCode);
-            $languageSaved = $model->save();
+        $model = new Language(null, $name, $isoCode);
+        $languageSaved = $model->save();
 
-            if ($languageSaved) {
-                $_SESSION['success_message'] = 'Idioma creado correctamente.';
-            } else {
-                $_SESSION['error_message'] = 'El Idioma no se ha creado correctamente.';
-                error_log("Database exception: Fallo al guardar el idioma - Nombre [{$name}] ISO Code [{$isoCode}]");
-            }
+        if ($languageSaved) {
+            $_SESSION['success_message'] = 'Idioma creado correctamente.';
+        } else {
+            $_SESSION['error_message'] = 'El Idioma no se ha creado correctamente.';
+            error_log("Database exception: Fallo al guardar el idioma - Nombre [{$name}] ISO Code [{$isoCode}]");
         }
 
         return $languageSaved;
@@ -42,33 +61,35 @@ class LanguageController
 
     function edit($id, $name, $isoCode): bool
     {
-        $languageSaved = false;
+        $languageEdited = false;
         $isoCode = strtoupper($isoCode);
-        $inputInvalid = $this->validInputFields($name, $isoCode);
 
-        if (!$inputInvalid) {
-
-            $model = new Language($id, $name, $isoCode);
-            $languageSaved = $model->update();
-
-            if ($languageSaved) {
-                $_SESSION['success_message'] = 'Idioma editado correctamente.';
-            } else {
-                $_SESSION['error_message'] = 'El Idioma no se ha editado correctamente.';
-                error_log("Database exception: Fallo al actualizar el idioma - ID [{$id}] Nombre [{$name}] ISO Code [{$isoCode}]");
-            }
+        if (!$this->validateIdType($id) || $this->validateInvalidInputFields($name, $isoCode)) {
+            return $languageEdited;
         }
 
-        return $languageSaved;
+        $model = new Language($id, $name, $isoCode);
+        $languageEdited = $model->update();
+
+        if ($languageEdited) {
+            $_SESSION['success_message'] = 'Idioma editado correctamente.';
+        } else {
+            $_SESSION['error_message'] = 'El Idioma no se ha editado correctamente.';
+            error_log("Database exception: Fallo al actualizar el idioma - ID [{$id}] Nombre [{$name}] ISO Code [{$isoCode}]");
+        }
+
+        return $languageEdited;
     }
 
     function delete($id): bool
     {
         $languageDeleted = false;
 
-        $this->validIdType($id);
+        if (!$this->validateIdType($id)) {
+            return $languageDeleted;
+        }
 
-        $model = new Language($id, null, null);
+        $model = new Language($id);
 
         $languageSaved = $model->getById();
 
@@ -90,22 +111,6 @@ class LanguageController
         return $languageDeleted;
     }
 
-    function showById($id): mixed
-    {
-        $this->validIdType($id);
-
-        $model = new Language($id, null, null);
-        $languageSaved = $model->getById();
-
-        if (!$languageSaved) {
-            $_SESSION['error_message'] = "Idioma inválido";
-            error_log("Database exception: ID de idioma no encontrado en la base de datos - [{$id}]");
-            return false;
-        }
-
-        return $languageSaved;
-    }
-
     function checkByIsoCode($isoCode): bool
     {
         $languageExist = false;
@@ -114,7 +119,7 @@ class LanguageController
         return $languageExist;
     }
 
-    function validInputFields($name, $isoCode): bool
+    function validateInvalidInputFields($name, $isoCode): bool
     {
         $inputInvalid = false;
         $inputAlreadyRegister = false;
@@ -145,11 +150,11 @@ class LanguageController
         return $inputInvalid;
     }
 
-    function validIdType($id): bool
+    function validateIdType($id): bool
     {
-        if (!ctype_digit($id)) {
+        if (LanguageValidation::validateIdDataType($id)) {
             $_SESSION['error_message'] = "Idioma inválido";
-            error_log("Database exception: ID de idioma inválido. Debe contener solo números - [{$id}]");
+            error_log("Validation exception: ID de idioma inválido. Debe contener solo números - [{$id}]");
             return false;
         }
         return true;

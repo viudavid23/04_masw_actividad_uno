@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <?php
 
+require_once '../../utils/SessionStart.php';
+
 $sendData = false;
 
 if (isset($_POST['createBtn'])) {
@@ -26,7 +28,9 @@ if ($sendData) {
 
 <body>
     <div class="container">
+
         <?php include('../../menu.php'); ?>
+
         <form name="create_language" action="" method="POST">
             <h2 class="h2">Registro de Idiomas</h2>
             <?php
@@ -84,7 +88,7 @@ if ($sendData) {
             <div class="row mb-3">
                 <div class="col">
                     <label class="form-label">Código ISO:</label>
-                    <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[A-Z0-9]{2,3}" title="Código ISO inválido." required>
+                    <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[a-zA-Z0-9]{2,3}" title="Código ISO inválido." required>
                 </div>
             </div>
             <div>

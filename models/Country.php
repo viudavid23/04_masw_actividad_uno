@@ -1,16 +1,20 @@
 <?php
+
 require_once('../../utils/DBManager.php');
-class Language
+
+class Country
 {
-    const TABLE_NAME = 'language';
+    const TABLE_NAME = 'country';
     const COLUMN_ID = 'id';
     const COLUMN_NAME = 'name';
-    const COLUMN_ISO_CODE = 'iso_code';
+    const COLUMN_DEMONYM = 'demonym';
+    const COLUMN_LANGUAGE_ID = 'language_id';
     private $id;
     private $name;
-    private $isoCode;
+    private $demonym;
+    private $languageId;
 
-    public function __construct($id = null, $name = null, $isoCode = null)
+    public function __construct($id = null, $name = null, $demonym = null, $languageId = null)
     {
         if ($id != null) {
             $this->id = $id;
@@ -18,8 +22,11 @@ class Language
         if ($name != null) {
             $this->name = $name;
         }
-        if ($isoCode != null) {
-            $this->isoCode = $isoCode;
+        if ($demonym != null) {
+            $this->demonym = $demonym;
+        }
+        if ($languageId != null) {
+            $this->languageId = $languageId;
         }
     }
 
@@ -30,8 +37,8 @@ class Language
         $listData = [];
 
         foreach ($resultSet as $item) {
-            $language = new Language($item[self::COLUMN_ID], $item[self::COLUMN_NAME], $item[self::COLUMN_ISO_CODE]);
-            array_push($listData, $language);
+            $country = new Country($item[self::COLUMN_ID], $item[self::COLUMN_NAME], $item[self::COLUMN_DEMONYM], $item[self::COLUMN_LANGUAGE_ID]);
+            array_push($listData, $country);
         }
 
         $dbManager->closeConnection();
@@ -48,43 +55,28 @@ class Language
         $stmt->execute();
         $result = $stmt->get_result();
 
-        $languageSaved = null;
+        $countrySaved = null;
 
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                $languageSaved = new Language($row[self::COLUMN_ID], $row[self::COLUMN_NAME], $row[self::COLUMN_ISO_CODE]);
+                $countrySaved = new Country($row[self::COLUMN_ID], $row[self::COLUMN_NAME], $row[self::COLUMN_DEMONYM], $row[self::COLUMN_LANGUAGE_ID]);
                 break;
             }
         } else {
-            $languageSaved = false;
+            $countrySaved = false;
         }
         
         $this->cleanConnection($stmt, $dbManager);
 
-        return $languageSaved;
+        return $countrySaved;
     }
-
-    public function getByIsoCode(): bool
-    {
-        $dbManager = new DBManager();
-        $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_ISO_CODE));
-        $stmt->bind_param('s', $this->isoCode);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        $languageSaved = ($result->num_rows > 0) ? true : false;
-
-        $this->cleanConnection($stmt, $dbManager);
-
-        return $languageSaved;
-    }
-
+/*
     public function save(): bool
     {
 
         $dbManager = new DBManager();
         $stmt = $dbManager->queryPrepare($this->insertQuery());
-        $stmt->bind_param('ss', $this->name, $this->isoCode);
+        $stmt->bind_param('sssi', $this->firstName, $this->lastName, $this->birthdate, $this->countryId);
         $stmt->execute();
 
         $saved = ($stmt->affected_rows > 0) ? true : false;
@@ -98,7 +90,7 @@ class Language
     {
         $dbManager = new DBManager();
         $stmt = $dbManager->queryPrepare($this->updateQuery());
-        $stmt->bind_param('ssi', $this->name, $this->isoCode, $this->id);
+        $stmt->bind_param('sssii', $this->firstName, $this->lastName, $this->birthdate, $this->countryId, $this->id);
         $stmt->execute();
 
         $updated = ($stmt->affected_rows > 0) ? true : false;
@@ -121,10 +113,11 @@ class Language
 
         return $saved;
     }
+*/
 
     /**
      * Get the value of id
-     */
+     */ 
     public function getId()
     {
         return $this->id;
@@ -134,7 +127,7 @@ class Language
      * Set the value of id
      *
      * @return  self
-     */
+     */ 
     public function setId($id)
     {
         $this->id = $id;
@@ -144,7 +137,7 @@ class Language
 
     /**
      * Get the value of name
-     */
+     */ 
     public function getName()
     {
         return $this->name;
@@ -154,7 +147,7 @@ class Language
      * Set the value of name
      *
      * @return  self
-     */
+     */ 
     public function setName($name)
     {
         $this->name = $name;
@@ -163,21 +156,41 @@ class Language
     }
 
     /**
-     * Get the value of isoCode
-     */
-    public function getIsoCode()
+     * Get the value of demonym
+     */ 
+    public function getDemonym()
     {
-        return $this->isoCode;
+        return $this->demonym;
     }
 
     /**
-     * Set the value of isoCode
+     * Set the value of demonym
      *
      * @return  self
-     */
-    public function setIsoCode($isoCode)
+     */ 
+    public function setDemonym($demonym)
     {
-        $this->isoCode = $isoCode;
+        $this->demonym = $demonym;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of languageId
+     */ 
+    public function getLanguageId()
+    {
+        return $this->languageId;
+    }
+
+    /**
+     * Set the value of languageId
+     *
+     * @return  self
+     */ 
+    public function setLanguageId($languageId)
+    {
+        $this->languageId = $languageId;
 
         return $this;
     }
@@ -191,7 +204,7 @@ class Language
 
     private function selectAllQuery(): string
     {
-        return "SELECT " . self::COLUMN_ID . "," . self::COLUMN_NAME . "," . self::COLUMN_ISO_CODE . " FROM " . self::TABLE_NAME;
+        return "SELECT " . self::COLUMN_ID . "," . self::COLUMN_NAME . "," . self::COLUMN_DEMONYM . "," . self::COLUMN_LANGUAGE_ID . " FROM " . self::TABLE_NAME;
     }
 
     private function selectByColumnQuery($column): string
@@ -201,12 +214,12 @@ class Language
 
     private function insertQuery(): string
     {
-        return "INSERT INTO " . self::TABLE_NAME . "(" .  self::COLUMN_NAME . "," . self::COLUMN_ISO_CODE . ") VALUES (?,?)";
+        return "INSERT INTO " . self::TABLE_NAME . "(" .  self::COLUMN_NAME . "," . self::COLUMN_DEMONYM . "," . self::COLUMN_LANGUAGE_ID . ") VALUES (?,?,?)";
     }
 
     private function updateQuery(): string
     {
-        return "UPDATE " . self::TABLE_NAME . " SET " .  self::COLUMN_NAME . "= ? ," . self::COLUMN_ISO_CODE . "= ? WHERE " . self::COLUMN_ID . "= ?";
+        return "UPDATE " . self::TABLE_NAME . " SET " .  self::COLUMN_NAME . "= ? ," .  self::COLUMN_DEMONYM . "= ? ," .  self::COLUMN_LANGUAGE_ID . "= ? WHERE " . self::COLUMN_ID . "= ?";
     }
 
     private function deleteQuery(): string

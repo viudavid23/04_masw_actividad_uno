@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <?php
+require_once '../../utils/SessionStart.php';
 require_once '../../controllers/LanguageController.php';
 
-$controller = new LanguageController();
-
 $sendData = false;
+
+$controller = new LanguageController();
 
 $languageId = $_GET['id'];
 
@@ -27,7 +28,9 @@ if ($sendData) {
 
 <body>
     <div class="container">
+        
         <?php include('../../menu.php'); ?>
+        
         <form name="edit_language" action="" method="POST">
             <h2 class="h2">Edición de Idiomas</h2>
             <?php
