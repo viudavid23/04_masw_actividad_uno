@@ -56,7 +56,7 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $platform->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-                                            <form name="delete_actor" action="delete.php" method="POST">
+                                            <form name="delete_platform" action="delete.php" method="POST">
                                                 <input type="hidden" name="platformId" value="<?php echo $platform->getId(); ?>" />
                                                 <button type="submit" class="btn btn-danger">Eliminar</button>
                                             </form>

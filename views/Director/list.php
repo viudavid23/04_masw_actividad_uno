@@ -71,8 +71,8 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $director->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-                                            <form name="delete_actor" action="delete.php" method="POST">
-                                                <input type="hidden" name="actorId" value="<?php echo $director->getId(); ?>" />
+                                            <form name="delete_director" action="delete.php" method="POST">
+                                                <input type="hidden" name="directorId" value="<?php echo $director->getId(); ?>" />
                                                 <button type="submit" class="btn btn-danger">Eliminar</button>
                                             </form>
                                         </div>

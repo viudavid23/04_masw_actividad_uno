@@ -18,7 +18,7 @@
             <h2 class="h2">Eliminación de Directores/as</h2>
             <?php
 
-            $id = $_POST['actorId'];
+            $id = $_POST['directorId'];
 
             $directorController = new DirectorController();
 
