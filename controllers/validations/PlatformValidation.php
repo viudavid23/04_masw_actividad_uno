@@ -6,6 +6,6 @@ class PlatformValidation {
     }
 
     public static function validateIdDataType($id): bool {
-        return !is_numeric($id) || $id <= 0;
+        return !(is_numeric($id) && $id > 0);
     }
 }
