@@ -3,6 +3,7 @@ require_once '../../utils/SessionStart.php';
 require_once('../../models/Actor.php');
 require_once '../../utils/Utilities.php';
 require_once('validations/ActorValidation.php');
+require_once('validations/CommonValidation.php');
 require_once('PersonController.php');
 
 class ActorController extends PersonController
@@ -15,14 +16,7 @@ class ActorController extends PersonController
         $actorObjectArray = [];
 
         foreach ($actorList as $item) {
-            $actorObject = new Actor(
-                $item->getId(),
-                ucfirst(Utilities::convertCharacters(0, $item->getStageName())),
-                Utilities::convertCharacters(0, $item->getBiography()),
-                Utilities::convertCharacters(0, $item->getAwards()),
-                $item->getHeight(),
-                $item->getPersonId()
-            );
+            $actorObject = $this->makeActor($item);
             array_push($actorObjectArray, $actorObject);
         }
         return $actorObjectArray;
@@ -38,19 +32,12 @@ class ActorController extends PersonController
         $actorSaved = $model->getById();
 
         if (!$actorSaved) {
-            $_SESSION['error_message'] = "Actor no encontrado";
-            error_log("Database exception: ID del actor no encontrado en la base de datos - [{$id}]");
+            $_SESSION['error_message'] = "Actor/Actriz no encontrado/a";
+            error_log("Database exception: ID del actor/actriz no encontrado en la base de datos - [{$id}]");
             return false;
         }
 
-        $actor = new Actor(
-            $actorSaved->getId(),
-            ucfirst(Utilities::convertCharacters(0, $actorSaved->getStageName())),
-            Utilities::convertCharacters(0, $actorSaved->getBiography()),
-            Utilities::convertCharacters(0, $actorSaved->getAwards()),
-            $actorSaved->getHeight(),
-            $actorSaved->getPersonId()
-        );
+        $actor = $this->makeActor($actorSaved);
 
         return $actor;
     }
@@ -79,13 +66,13 @@ class ActorController extends PersonController
     
             if ($actorSaved) {
     
-                $_SESSION['success_message'] = 'La información del Actor se ha registrado correctamente.';
+                $_SESSION['success_message'] = 'La información del Actor/Actriz se ha registrado correctamente.';
             }else{
 
                 $this->deletePerson($personId);
 
-                $_SESSION['error_message'] = 'La información del Actor no se ha registrado correctamente.';
-                error_log("Database exception: Fallo al guardar el actor - Nombre Artistico [{$stageName}] ) Altura [{$height}] ID Persona [{$personId}]");
+                $_SESSION['error_message'] = 'La información del Actor/Actriz no se ha registrado correctamente.';
+                error_log("Database exception: Falló al guardar el actor - Nombre Artístico [{$stageName}] Altura [{$height}] ID Persona [{$personId}]");
             }
         }
         return $actorSaved;
@@ -117,8 +104,8 @@ class ActorController extends PersonController
             $this->handlePersonEditedMessage($personEdited);
             
         }else{
-            $_SESSION['error_message'] = 'Actor no se ha actualizado correctamente.';
-            error_log("Database exception: Fallo al editar el actor - Id: [{$actorId}] Nombre Artistico [{$stageName}] ) Altura [{$height}] ID Persona [{$personId}]");
+            $_SESSION['error_message'] = 'Actor/Actriz no se ha actualizado correctamente.';
+            error_log("Database exception: Falló al editar el/la actor/actriz - Id: [{$actorId}] Nombre Artístico [{$stageName}] Altura [{$height}] ID Persona [{$personId}]");
         }
 
         return $actorEdited;
@@ -137,35 +124,47 @@ class ActorController extends PersonController
         $actorDeleted = $model->getById();
 
         if (!$actorDeleted) {
-            $_SESSION['warning_message'] = "Actor no encontrado";
-            error_log("Database exception: ID del actor no encontrada en la base de datos - [{$id}]");
+            $_SESSION['warning_message'] = "Actor/Actriz no encontrado";
+            error_log("Database exception: ID del actor/actriz no encontrada en la base de datos - [{$id}]");
             return $actorDeleted;
         }
 
         $actorDeleted = $this->deletePerson($actorDeleted->getPersonId());
 
         if ($actorDeleted) {
-            $_SESSION['success_message'] = 'La información del Actor se ha eliminado correctamente.';
+            $_SESSION['success_message'] = 'La información del Actor/Actriz se ha eliminado correctamente.';
         }else {
-            $_SESSION['error_message'] = 'La información del Actor no se ha eliminado correctamente.';
-            error_log("Database exception: Fallo al eliminar el actor - ID [{$id}]");
+            $_SESSION['error_message'] = 'La información del Actor/Actriz no se ha eliminado correctamente.';
+            error_log("Database exception: Falló al eliminar el/la actor/actriz - ID Actor/Actriz [{$id}]");
         }
 
         return $actorDeleted;
     }
 
+    private function makeActor(Actor $source): Actor
+    {
+       return new Actor(
+            $source->getId(),
+            ucfirst(Utilities::convertCharacters(0, $source->getStageName())),
+            Utilities::convertCharacters(0, $source->getBiography()),
+            Utilities::convertCharacters(0, $source->getAwards()),
+            $source->getHeight(),
+            $source->getPersonId()
+       );
+    }
+
     private function handlePersonEditedMessage(bool $personEdited){
         if ($personEdited) {
-            $_SESSION['success_message'] = 'Actor y Datos Personales se han actulizado correctamente';
+            $_SESSION['success_message'] = 'Actor/Actriz y Datos Personales se han actualizado correctamente';
         } else {
-            $_SESSION['error_message'] = 'Actor actualizado, pero los datos personales no se han actualizado correctamente.';
+            $_SESSION['error_message'] = 'Actor/Actriz actualizado, pero los datos personales no se han actualizado correctamente.';
         }
     }
 
     private function hasValidActorIdType($id): bool
     {
-        if (PersonValidation::validateIdDataType($id)) {
-            error_log("Validation exception: ID del actor inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
+        if (ActorValidation::validateIdDataType($id)) {
+            error_log("Validation exception: ID del actor/actriz inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
             return false;
         }
         return true;
@@ -180,8 +179,8 @@ class ActorController extends PersonController
             $inputInvalid = true;
         }
 
-        if (ActorValidation::validateLength($actorData['biography'])) {
-            error_log("Validation exception: Biografía vacia o supera la cantidad maxima de caracteres de 5000. Longitud - [{" . strlen($actorData['biography']) . "}]");
+        if (CommonValidation::validateLength($actorData['biography'], Constants::BIOGRAPHY_LENGTH)) {
+            error_log("Validation exception: Biografía vacia o supera la cantidad maxima de caracteres de " . Constants::BIOGRAPHY_LENGTH . " Longitud - [{" . strlen($actorData['biography']) . "}]");
             $inputInvalid = true;
         }
 
@@ -190,7 +189,7 @@ class ActorController extends PersonController
             $inputInvalid = true;
         }
 
-        if ($edit && ActorValidation::validateIdDataType($actorData['personId'])) {
+        if ($edit && PersonValidation::validateIdDataType($actorData['personId'])) {
             error_log("Validation exception: ID de la persona inválido. Debe contener solo números y ser mayor a cero  - [{$actorData['personId']}]");
             $inputInvalid = true;
         }

@@ -4,6 +4,8 @@ require_once('../../utils/Constants.php');
 require_once('../../utils/Utilities.php');
 require_once('../../models/Person.php');
 require_once('validations/PersonValidation.php');
+require_once('validations/CommonValidation.php');
+
 class PersonController
 {
     function showPersonById($id): mixed
@@ -134,8 +136,8 @@ class PersonController
             $inputInvalid = true;
         }
 
-        if (empty($personData['birthdate'])) {
-            error_log("Validation exception: Fecha de nacimiento inválida. No debe ser nula  - [{$personData['birthdate']}]");
+        if (CommonValidation::isInvalidDate($personData['birthdate'])) {
+            error_log("Validation exception: Fecha de nacimiento vacia o no cumple con un formato de fecha aceptado  - [{$personData['birthdate']}]");
             $inputInvalid = true;
         }
 
