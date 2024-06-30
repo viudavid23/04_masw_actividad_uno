@@ -131,7 +131,7 @@ class LanguageController
         $languageExist = false;
         $model = new Language(null, null, $isoCode);
         $languageExist = $model->getByIsoCode();
-        return $languageExist;
+        return is_bool($languageExist) ? false : true;
     }
 
     function validateInvalidInputFields($name, $isoCode, $create): bool
@@ -163,8 +163,7 @@ class LanguageController
                 $inputInvalid = true;
             }
         }
-       
-
+    
         return $inputInvalid;
     }
 

@@ -65,7 +65,7 @@ class Language
         return $languageSaved;
     }
 
-    public function getByIsoCode(): bool
+    public function getByIsoCode(): mixed
     {
         $dbManager = new DBManager();
         $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_ISO_CODE));
@@ -73,7 +73,16 @@ class Language
         $stmt->execute();
         $result = $stmt->get_result();
 
-        $languageSaved = ($result->num_rows > 0) ? true : false;
+        $languageSaved = null;
+
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $languageSaved = new Language($row[self::COLUMN_ID], $row[self::COLUMN_NAME], $row[self::COLUMN_ISO_CODE]);
+                break;
+            }
+        } else {
+            $languageSaved = false;
+        }
 
         $this->cleanConnection($stmt, $dbManager);
 
@@ -107,7 +116,7 @@ class Language
 
         $alreadySaved = $this->getByIsoCode($this->getIsoCode());
 
-        if ($alreadySaved) {
+        if (!is_bool($alreadySaved) && $this->id != $alreadySaved->getId()) {
             error_log("Database exception: El ISO Code se encuentra asociado a otro idioma - ISO Code [{$this->isoCode}]");
             return false;
         }
