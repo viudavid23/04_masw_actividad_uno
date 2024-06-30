@@ -16,8 +16,8 @@
             Idiomas
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/language/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/language/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Language/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Language/create.php">Registrar</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -26,22 +26,38 @@
             Actores
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/actor/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/actor/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Actor/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Actor/create.php">Registrar</a></li>
           </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Pricing</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
             data-bs-toggle="dropdown" aria-expanded="false">
-            Dropdown link
+            Directores
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="#">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another action</a></li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Director/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Director/create.php">Registrar</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            Plataformas
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Platform/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Platform/create.php">Registrar</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            Series
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Serie/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Serie/create.php">Registrar</a></li>
           </ul>
         </li>
       </ul>
