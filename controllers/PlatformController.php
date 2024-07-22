@@ -21,7 +21,7 @@ class PlatformController
 
     function showById($id): mixed
     {
-        if (!$this->validateIdType($id)) {
+        if (!$this->checkValidIdDataType($id)) {
             return false;
         }
 
@@ -29,21 +29,19 @@ class PlatformController
         $platformSaved = $model->getById();
 
         if (!$platformSaved) {
-            $_SESSION['error_message'] = "Plataforma [{$id}] no registrada";
             error_log("Database exception: ID de la plataforma no encontrado en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Plataforma [{$id}] no registrada");
             return false;
         }
 
-        $platform = $this->makePlatform($platformSaved);
-
-        return $platform;
+        return $this->makePlatform($platformSaved);
     }
 
     function create($platformData): bool
     {
         $platformSaved = false;
 
-        if ($this->validateInvalidInputFields($platformData, true)) {
+        if ($this->checkValidInputFields($platformData, true)) {
             return $platformSaved;
         }
 
@@ -69,7 +67,7 @@ class PlatformController
     {
         $platformEdited = false;
 
-        if (!$this->validateIdType($id) || $this->validateInvalidInputFields($platformData, false)) {
+        if (!$this->checkValidIdDataType($id) || $this->checkValidInputFields($platformData, false)) {
             return $platformEdited;
         }
 
@@ -95,7 +93,7 @@ class PlatformController
     {
         $platformDeleted = false;
 
-        if (!$this->validateIdType($id)) {
+        if (!$this->checkValidIdDataType($id)) {
             return $platformDeleted;
         }
 
@@ -138,7 +136,7 @@ class PlatformController
         return $plarformExist;
     }
 
-    function validateInvalidInputFields($platformData, $create): bool
+    function checkValidInputFields($platformData, $create): bool
     {
         $inputInvalid = false;
         $inputAlreadyRegister = false;
@@ -171,9 +169,9 @@ class PlatformController
         return $inputInvalid;
     }
 
-    function validateIdType($id): bool
+    function checkValidIdDataType($id): bool
     {
-        if (PlatformValidation::validateIdDataType($id)) {
+        if (PlatformValidation::isInvalidIdDataType($id)) {
             $_SESSION['error_message'] = "Plataforma [{$id}] inválida";
             error_log("Validation exception: ID de la plataforma inválido. Debe contener solo números - [{$id}]");
             return false;

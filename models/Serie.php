@@ -69,19 +69,21 @@ class Serie
         return $serieSaved;
     }
 
-    public function save(): bool
+    public function save(): self
     {
-
         $dbManager = new DBManager();
+
         $stmt = $dbManager->queryPrepare($this->insertQuery());
         $stmt->bind_param('sss', $this->title, $this->synopsis, $this->releaseDate);
         $stmt->execute();
 
-        $saved = ($stmt->affected_rows > 0) ? true : false;
-
+        if($stmt->affected_rows > 0){
+            $this->id = $dbManager->getConnection()->insert_id;
+        }
+        
         $this->cleanConnection($stmt, $dbManager);
 
-        return $saved;
+        return $this;
     }
 
     public function update(): bool
@@ -90,11 +92,11 @@ class Serie
 
         $serieSaved = $this->getById($this->id);
 
-        if($serieSaved == false){
-            return $serieSaved;
+        if(!$serieSaved){
+            return false;
         }
 
-        if (!$this->isDataDifferent($serieSaved)) {
+        if (!$this->compareCurrentData($serieSaved)) {
             return true;
         }
 
@@ -203,7 +205,13 @@ class Serie
         return $this;
     }
 
-    private function isDataDifferent($currentData): bool
+    /**
+     * Función para determinar si los datos recibidos son iguales a los datos almacenados en el proceso de actualización.
+     * Si la data es igual no se continua con el proceso.
+     * 
+     * @return boolean true si los datos son diferentes y false si los datos son iguales
+     */
+    private function compareCurrentData($currentData): bool
     {
         return strtolower($currentData->getTitle()) !== strtolower($this->getTitle()) ||
             strtolower($currentData->getSynopsis()) !== strtolower($this->getSynopsis()) ||

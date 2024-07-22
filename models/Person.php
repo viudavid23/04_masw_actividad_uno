@@ -84,7 +84,7 @@ class Person
 
         $personSaved = $this->getById($this->id);
 
-        if(!$this->isDataDifferent($personSaved)){
+        if(!$this->compareCurrentData($personSaved)){
             return true;
         }
 
@@ -213,7 +213,7 @@ class Person
         return $this;
     }
 
-    private function isDataDifferent($currentData): bool
+    private function compareCurrentData($currentData): bool
     {
 
         return strtolower($currentData->getFirstName()) !== strtolower($this->getFirstName()) ||

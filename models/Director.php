@@ -103,7 +103,7 @@ class Director
 
         $actorSaved = $this->getById($this->id);
 
-        if (!$this->isDataDifferent($actorSaved)) {
+        if (!$this->compareCurrentData($actorSaved)) {
             return true;
         }
 
@@ -132,7 +132,7 @@ class Director
         return $deleted;
     }
 
-    private function isDataDifferent($currentData): bool
+    private function compareCurrentData($currentData): bool
     {
         return $currentData->getBeginningCareer() !== $this->getBeginningCareer() ||
             $currentData->getActiveYears() !== (int)$this->getActiveYears() ||

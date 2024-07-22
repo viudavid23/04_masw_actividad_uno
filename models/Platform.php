@@ -111,7 +111,7 @@ class Platform
 
         $platformSaved = $this->getById($this->id);
 
-        if ($platformSaved && !$this->isDataDifferent($platformSaved)) {
+        if ($platformSaved && !$this->compareCurrentData($platformSaved)) {
             return true;
         }
 
@@ -248,7 +248,7 @@ class Platform
         return $this;
     }
 
-    private function isDataDifferent($currentData): bool
+    private function compareCurrentData($currentData): bool
     {
         return strtolower($currentData->getName()) !== strtolower($this->getName()) ||
             strtolower($currentData->getDescription()) !== strtolower($this->getDescription()) ||

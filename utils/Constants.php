@@ -9,4 +9,9 @@ class Constants
     const DATE_OUTPUT_FORMAT = 'd/m/Y';
     const BIOGRAPHY_LENGTH = 5000;
     const SYNOPSIS_LENGTH = 1000;
+    const BAD_REQUEST_CODE = 400;
+    const NOT_FOUND_CODE = 404;
+    const FAILED_DEPENDENCY_CODE = 404;
+    const INTERNAL_SERVER_ERROR_CODE = 500;
+
 }

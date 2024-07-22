@@ -109,7 +109,7 @@ class Language
 
         $languageSaved = $this->getById($this->id);
 
-        if (!$this->isDataDifferent($languageSaved)) {
+        if (!$this->compareCurrentData($languageSaved)) {
             return true;
         }
 
@@ -205,7 +205,7 @@ class Language
         return $this;
     }
 
-    private function isDataDifferent($currentData): bool
+    private function compareCurrentData($currentData): bool
     {
         return strtolower($currentData->getName()) !== strtolower($this->getName()) ||
             strtolower($currentData->getIsoCode()) !== strtolower($this->getIsoCode());

@@ -103,7 +103,7 @@ class Actor
 
         $actorSaved = $this->getById($this->id);
 
-        if(!$this->isDataDifferent($actorSaved)){
+        if(!$this->compareCurrentData($actorSaved)){
             return true;
         }
 
@@ -252,7 +252,7 @@ class Actor
         return $this;
     }
 
-    private function isDataDifferent($currentData): bool
+    private function compareCurrentData($currentData): bool
     {
         return strtolower($currentData->getStageName()) !== strtolower($this->getStageName()) ||
         strtolower($currentData->getBiography()) !== strtolower($this->getBiography()) ||
