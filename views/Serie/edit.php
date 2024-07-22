@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <?php
 require_once '../../utils/SessionStart.php';
-
 require_once '../../controllers/SerieController.php';
+require_once('../../controllers/PlatformSerieController.php');
+require_once('../../controllers/ActorSerieController.php');
 
+$platformSerieController = new PlatformSerieController;
+$actorSerieController = new ActorSerieController;
 $serieController = new SerieController();
 
 $sendData = false;
 
 $serieId = $_GET['id'];
 
+$platformOptions = $platformSerieController->getPlatformOptions($serieId);
+$actorOptions = $actorSerieController->getActorSerieOptions($serieId);
 $serieSaved = $serieController->showById($serieId);
 
 if (isset($_POST['editBtn'])) {
@@ -21,15 +26,19 @@ if ($sendData) {
         'id' => $serieId,
         'title' => $_POST['title'],
         'synopsis' => $_POST['synopsis'],
-        'releaseDate' => $_POST['releaseDate']
+        'release_date' => $_POST['releaseDate'],
+        'platforms' => $_POST['platformsSelect'],
+        'actors' => $_POST['actorsSelect']
     ];
 
     if (!is_bool($serieSaved)) {
 
-        $serieEdited = $serieController->edit($serieSaved->getId(), $serieData);
+        $serieEdited = $serieController->edit($serieId, $serieData);
 
         if ($serieEdited) {
             $serieSaved = $serieController->showById($serieId);
+            $platformOptions = $platformSerieController->getPlatformOptions($serieId);
+            $actorOptions = $actorSerieController->getActorSerieOptions($serieId);
         }
     }
 }
@@ -135,6 +144,30 @@ if ($sendData) {
                 <label for="sinopsis">Sinópsis<span class="required">*</span></label>
                 <textarea class="form-control" id="sinopsis" name="synopsis" rows="3" placeholder="Máximo 1000 caracteres"><?php echo $serieSaved->getSynopsis(); ?></textarea>
             </div>
+
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="plataforma">Plataformas<span class="required">*</span></label>
+
+                    <select id="plataforma" name="platformsSelect[]" multiple required>
+                        <option value="Seleccione...">Seleccione...</option>
+                        <?php echo $platformOptions; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="actor">Actores/Actrices<span class="required">*</span></label>
+
+                    <select id="actor" name="actorsSelect[]" multiple required>
+                        <option value="Seleccione...">Seleccione...</option>
+                        <?php echo $actorOptions; ?>
+                    </select>
+                </div>
+            </div>
+
             <div class="col-12">
                 <button type="submit" class="btn btn-primary" name="editBtn">Editar</button>
                 <a href="list.php" class="btn btn-danger">Cancelar</a>

@@ -16,7 +16,9 @@ if ($sendData) {
     $serieData = [
         'title' => $_POST['title'],
         'synopsis' => $_POST['synopsis'],
-        'releaseDate' => $_POST['releaseDate']
+        'release_date' => $_POST['releaseDate'],
+        'platforms' => $_POST['platformsSelect'],
+        'actors' => $_POST['actorsSelect']
     ];
 
     $serieController->create($serieData);
@@ -101,6 +103,56 @@ if ($sendData) {
                 <label for="sinopsis">Sinópsis<span class="required">*</span></label>
                 <textarea class="form-control" id="sinopsis" name="synopsis" rows="3" placeholder="Máximo 1000 caracteres"></textarea>
             </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="plataformas">Plataformas <span class="required">*</span></label>
+                    <select class="form-control" id="plataformas" name="platformsSelect[]" multiple required>
+                        <option selected>Seleccione...</option>
+                        <?php
+
+                        require_once '../../controllers/PlatformController.php';
+
+                        $platformController = new PlatformController();
+
+                        $plarformList = $platformController->showAll();
+
+                        foreach ($plarformList as $item) {
+                            $platformOption = Utilities::concatStrings("[", $item->getid(), "]", " - " ,$item->getName());
+                        ?>
+                            <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $platformOption?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="actores">Actores/Actrices <span class="required">*</span></label>
+                    <select class="form-control" id="actores" name="actorsSelect[]" multiple required>
+                        <option selected>Seleccione...</option>
+                        <?php
+
+                        require_once '../../controllers/ActorController.php';
+
+                        $actorController = new ActorController();
+
+                        $actorList = $actorController->showAllActors();
+
+                        foreach ($actorList as $item) {
+                            $person = $actorController->showPersonById($item->getPersonId());
+                            $actorOption = Utilities::concatStrings("[", $person->getId(), "]", " - " ,$person->getFirstName() , " ", $person->getLastName());
+                        ?>
+                            <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $actorOption; ?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
             <div class="col-12">
                 <button type="submit" class="btn btn-primary" name="createBtn">Guardar</button>
                 <a href="list.php" class="btn btn-danger">Cancelar</a>
