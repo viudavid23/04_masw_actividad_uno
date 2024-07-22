@@ -110,7 +110,7 @@ class PersonController
 
     protected function hasValidPersonIdType($id): bool
     {
-        if (PersonValidation::validateIdDataType($id)) {
+        if (PersonValidation::isInvalidIdDataType($id)) {
             error_log("Validation exception: ID de la persona inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
             return false;
         }
@@ -131,7 +131,7 @@ class PersonController
             $inputInvalid = true;
         }
 
-        if (PersonValidation::validateIdDataType($personData['countryId'])) {
+        if (PersonValidation::isInvalidIdDataType($personData['countryId'])) {
             error_log("Validation exception: ID del país inválido. Debe contener solo números y ser mayor a cero  - [{$personData['countryId']}]");
             $inputInvalid = true;
         }

@@ -20,7 +20,7 @@ class LanguageController
 
     function showById($id): mixed
     {
-        if (!$this->validateIdType($id)) {
+        if (!$this->checkValidIdDataType($id)) {
             return false;
         }
 
@@ -52,7 +52,7 @@ class LanguageController
         $name = strtoupper($name);
         $isoCode = strtoupper($isoCode);
 
-        if ($this->validateInvalidInputFields($name, $isoCode, true)) {
+        if ($this->checkValidInputFields($name, $isoCode, true)) {
             return $languageSaved;
         }
 
@@ -79,7 +79,7 @@ class LanguageController
         $name = strtoupper($name);
         $isoCode = strtoupper($isoCode);
 
-        if (!$this->validateIdType($id) || $this->validateInvalidInputFields($name, $isoCode, false)) {
+        if (!$this->checkValidIdDataType($id) || $this->checkValidInputFields($name, $isoCode, false)) {
             return $languageEdited;
         }
 
@@ -100,7 +100,7 @@ class LanguageController
     {
         $languageDeleted = false;
 
-        if (!$this->validateIdType($id)) {
+        if (!$this->checkValidIdDataType($id)) {
             return $languageDeleted;
         }
 
@@ -134,7 +134,7 @@ class LanguageController
         return is_bool($languageExist) ? false : true;
     }
 
-    function validateInvalidInputFields($name, $isoCode, $create): bool
+    function checkValidInputFields($name, $isoCode, $create): bool
     {
         $inputInvalid = false;
         $inputAlreadyRegister = false;
@@ -167,9 +167,9 @@ class LanguageController
         return $inputInvalid;
     }
 
-    function validateIdType($id): bool
+    function checkValidIdDataType($id): bool
     {
-        if (LanguageValidation::validateIdDataType($id)) {
+        if (LanguageValidation::isInvalidIdDataType($id)) {
             $_SESSION['error_message'] = "Idioma [{$id}] inválido";
             error_log("Validation exception: ID de idioma inválido. Debe contener solo números - [{$id}]");
             return false;

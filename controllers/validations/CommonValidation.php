@@ -18,11 +18,26 @@ class CommonValidation
         return true;
     }
 
-    public static function validateNumericInput($id): bool {
-        return !(is_numeric($id) && $id > 0);
+    public static function isInvalidInteger($id): bool {
+        return !(is_int($id) && $id > 0);
     }
 
-    public static function validateLength($cadena, int $lenght): bool {
+    public static function hasInvalidLength($cadena, int $lenght): bool {
         return empty($cadena) || strlen($cadena) > $lenght;
+    }
+
+    public static function isInvalidIntegerList($list): bool {
+
+        if (empty($list)) {
+            return true;
+        }
+
+        foreach($list as $item){
+            if (!is_numeric($item) || $item <= 0){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

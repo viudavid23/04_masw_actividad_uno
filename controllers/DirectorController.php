@@ -164,7 +164,7 @@ class DirectorController extends PersonController
 
     private function hasValidDirectorIdType($id): bool
     {
-        if (DirectorValidation::validateIdDataType($id)) {
+        if (DirectorValidation::isInvalidIdDataType($id)) {
             $_SESSION['error_message'] = "Director [{$id}] inválido";
             error_log("Validation exception: ID del director inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
             return false;
@@ -181,17 +181,17 @@ class DirectorController extends PersonController
             $inputInvalid = true;
         }
 
-        if (CommonValidation::validateNumericInput($directorData['activeYears'])) {
+        if (CommonValidation::isInvalidInteger($directorData['activeYears'])) {
             error_log("Validation exception: Años activo inválido. Debe contener solo números y ser mayor a cero  - [{$directorData['activeYears']}]");
             $inputInvalid = true;
         }
 
-        if (CommonValidation::validateLength($directorData['biography'], Constants::BIOGRAPHY_LENGTH)) {
+        if (CommonValidation::hasInvalidLength($directorData['biography'], Constants::BIOGRAPHY_LENGTH)) {
             error_log("Validation exception: Biografía vacia o supera la cantidad maxima de caracteres de " . Constants::BIOGRAPHY_LENGTH . " Longitud - [{" . strlen($directorData['biography']) . "}]");
             $inputInvalid = true;
         }
 
-        if ($edit && PersonValidation::validateIdDataType($directorData['personId'])) {
+        if ($edit && PersonValidation::isInvalidIdDataType($directorData['personId'])) {
             error_log("Validation exception: ID de la persona inválido. Debe contener solo números y ser mayor a cero  - [{$directorData['personId']}]");
             $inputInvalid = true;
         }

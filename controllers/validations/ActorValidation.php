@@ -10,7 +10,7 @@ class ActorValidation {
         return !(is_numeric($height) && $height > 0);
     }
 
-    public static function validateIdDataType($id): bool {
+    public static function isInvalidIdDataType($id): bool {
         return !(is_numeric($id) && $id > 0);
     }
 }

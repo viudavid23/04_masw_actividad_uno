@@ -9,7 +9,7 @@ class LanguageValidation {
         return empty($isoCode) || !preg_match('/^([A-Z]{2,3}|\d{3})$/', $isoCode);
     }
 
-    public static function validateIdDataType($id): bool {
+    public static function isInvalidIdDataType($id): bool {
         return !is_numeric($id) || $id <= 0;
     }
 }

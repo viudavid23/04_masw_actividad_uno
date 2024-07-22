@@ -163,7 +163,7 @@ class ActorController extends PersonController
 
     private function hasValidActorIdType($id): bool
     {
-        if (ActorValidation::validateIdDataType($id)) {
+        if (ActorValidation::isInvalidIdDataType($id)) {
             $_SESSION['error_message'] = "Actor/Actriz [{$id}] inválido";
             error_log("Validation exception: ID del actor/actriz inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
             return false;
@@ -180,7 +180,7 @@ class ActorController extends PersonController
             $inputInvalid = true;
         }
 
-        if (CommonValidation::validateLength($actorData['biography'], Constants::BIOGRAPHY_LENGTH)) {
+        if (CommonValidation::hasInvalidLength($actorData['biography'], Constants::BIOGRAPHY_LENGTH)) {
             error_log("Validation exception: Biografía vacia o supera la cantidad maxima de caracteres de " . Constants::BIOGRAPHY_LENGTH . " Longitud - [{" . strlen($actorData['biography']) . "}]");
             $inputInvalid = true;
         }
@@ -190,7 +190,7 @@ class ActorController extends PersonController
             $inputInvalid = true;
         }
 
-        if ($edit && PersonValidation::validateIdDataType($actorData['personId'])) {
+        if ($edit && PersonValidation::isInvalidIdDataType($actorData['personId'])) {
             error_log("Validation exception: ID de la persona inválido. Debe contener solo números y ser mayor a cero  - [{$actorData['personId']}]");
             $inputInvalid = true;
         }
