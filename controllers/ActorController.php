@@ -32,7 +32,7 @@ class ActorController extends PersonController
         $actorSaved = $model->getById();
 
         if (!$actorSaved) {
-            $_SESSION['error_message'] = "Actor/Actriz [{$id}] no registrado/a";
+            $_SESSION['warning_message'] = "Actor/Actriz [{$id}] no registrado/a";
             error_log("Database exception: ID del actor/actriz no encontrado en la base de datos - [{$id}]");
             return false;
         }
