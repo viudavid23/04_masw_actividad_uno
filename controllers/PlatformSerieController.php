@@ -1,6 +1,7 @@
 <?php
 require_once '../../utils/SessionStart.php';
 require_once '../../utils/Utilities.php';
+require_once('exceptions/RecordNotFoundException.php');
 require_once('../../models/PlatformSerie.php');
 require_once('PlatformController.php');
 class PlatformSerieController
@@ -16,7 +17,7 @@ class PlatformSerieController
             $platformSerieSaved = $model->getBySerieId();
 
             if (count($platformSerieSaved) == 0) {
-                error_log("[PlatformSerieController] [Data Error] ID de la serie no encontrado en la base de datos - [{$serieId}]");
+                error_log("[PlatformSerieController] [Data Error] ID de la serie no encontrado en la tabla platform_serie de la base de datos - [{$serieId}]");
                 Utilities::setWarningMessage("Serie [{$serieId}] no registrada", Constants::NOT_FOUND_CODE);
                 return false;
             }
@@ -29,7 +30,7 @@ class PlatformSerieController
     }
 
     function create($serieId, $platformIdsData): bool
-    { 
+    {
         try {
             $this->checkValidSerieIdDataType($serieId);
             $this->checkValidPlatformSerieInputFields($platformIdsData);
@@ -43,35 +44,66 @@ class PlatformSerieController
             }
 
             $platformIdsDecode = json_encode($platformIdsData);
-            error_log("[PlatformSerieController] [Data Error] Falló al guardar las plataformas [{$platformIdsDecode}] de la serie [{$serieId}]");
+            error_log("[PlatformSerieController] [Data Error] Falló al guardar las plataformas [{$platformIdsDecode}] de la serie [{$serieId}] en la tabla platform_serie");
             throw new RuntimeException("Las plataformas [{$platformIdsDecode}] de la serie [{$serieId}] no se han creado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
+        } catch (RecordNotFoundException $e) {
+            error_log("[ActorSerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setWarningMessage($e->getMessage());
+            return false;
         } catch (InvalidArgumentException $e) {
             error_log("[PlatformSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[PlatformSerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
 
     function edit($serieId, $newPlatformIds): bool
     {
-        $platformSerieSaved = $this->showBySerieId($serieId);
-        $platformSerieIds = [];
+        try {
 
-        foreach($platformSerieSaved as $item){
-            $platformSerieIds[] = $item->getPlatformId();
-        }   
+            $this->checkValidSerieIdDataType($serieId);
+            $this->checkValidPlatformSerieInputFields($newPlatformIds);
+            $this->checkValidPlatform($newPlatformIds);
 
-        $this->saveNewSeriePlatforms($serieId, $newPlatformIds, $platformSerieIds);
+            $platformSerieSaved = $this->showBySerieId($serieId);
+            $platformSerieIds = [];
 
-        $platformSerieToUpdate = $this->setSeriePlatformToUpdate($newPlatformIds, $platformSerieIds);
+            foreach ($platformSerieSaved as $item) {
+                $platformSerieIds[] = $item->getPlatformId();
+            }
 
-        $model = new PlatformSerie(null, $serieId);
+            $this->saveNewSeriePlatforms($serieId, $newPlatformIds, $platformSerieIds);
 
-        $platformSerieEdited = $model->update($platformSerieToUpdate);
+            $platformSerieToUpdate = $this->setSeriePlatformToUpdate($newPlatformIds, $platformSerieIds);
 
-        return $platformSerieEdited;
+            $model = new PlatformSerie(null, $serieId);
+
+            $platformSerieEdited = $model->update($platformSerieToUpdate);
+
+            if ($platformSerieEdited) {
+                return true;
+            }
+
+            $platformIdsDecode = json_encode($newPlatformIds);
+            error_log("[PlatformSerieController] [Data Error] Falló al actualizar las plataformas [{$platformIdsDecode}] de la serie [{$serieId}] en la tabla platform_serie");
+            throw new RuntimeException("Las plataformas [{$platformIdsDecode}] de la serie [{$serieId}] no se han editado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
+        } catch (RecordNotFoundException $e) {
+            error_log("[PlatformSerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setWarningMessage($e->getMessage());
+            return false;
+        } catch (InvalidArgumentException $e) {
+            error_log("[PlatformSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setErrorMessage($e->getMessage());
+            return false;
+        } catch (RuntimeException $e) {
+            error_log("[PlatformSerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setErrorMessage($e->getMessage());
+            return false;
+        }
     }
 
     private function setSeriePlatformToUpdate(array $newPlatformIds, array $platformSerieIdsSaved): array
@@ -107,7 +139,7 @@ class PlatformSerieController
         $serieSaved = $model->getById();
 
         if (!$serieSaved) {
-            error_log("[PlatformSerieController] [Data Error] Serie no encontrada en la base de datos - ID [{$id}]");
+            error_log("[PlatformSerieController] [Data Error] Serie no encontrada en la tabla platform_serie de la base de datos - SERIE_ID [{$id}]");
             $_SESSION['warning_message'] = "Serie [{$id}] no registrada";
             return $serieDeleted;
         }
@@ -115,7 +147,7 @@ class PlatformSerieController
         $serieDeleted = $model->delete();
 
         if (!$serieDeleted) {
-            error_log("[PlatformSerieController] [Data Error] Falló al eliminar la Serie - ID [{$id}]");
+            error_log("[PlatformSerieController] [Data Error] Falló al eliminar de la base de datos la Serie en la tabla platform_serie - SERIE_ID [{$id}]");
         }
 
         return $serieDeleted;
@@ -152,7 +184,7 @@ class PlatformSerieController
             $platformSaved = $platformController->showById($plaformItem);
             if (!$platformSaved) {
                 error_log("[PlatformSerieController] [Data Error] ID de la plataforma no encontrado en la base de datos - [{$plaformItem}]");
-                throw new RuntimeException("Plataforma [{$plaformItem}] no registrada", Constants::NOT_FOUND_CODE);
+                throw new RecordNotFoundException("Plataforma [{$plaformItem}] no registrada");
             }
         }
     }
@@ -160,17 +192,17 @@ class PlatformSerieController
     function getPlatformOptions(int $serieId): string
     {
         $platformController = new PlatformController();
-        
+
         $platformSerieList = $this->showBySerieId($serieId);
 
         $platformsList = $platformController->showAll();
-        
+
         $selectedPlatformIds = [];
         if (isset($platformSerieList) && !empty($platformSerieList)) {
             foreach ($platformSerieList as $platformSerieItem) {
                 if ($platformSerieItem->getStatus() == 1) {
                     $selectedPlatformIds[] = $platformSerieItem->getPlatformId();
-                }   
+                }
             }
         }
 
@@ -178,7 +210,7 @@ class PlatformSerieController
 
         foreach ($platformsList as $itemPlatform) {
             $platformId = $itemPlatform->getId();
-            $platformOption = Utilities::concatStrings("[", $platformId, "]", " - " , $itemPlatform->getName());
+            $platformOption = Utilities::concatStrings("[", $platformId, "]", " - ", $itemPlatform->getName());
 
             if (in_array($platformId, $selectedPlatformIds)) {
                 $options .= '<option value="' . $platformId . '" selected=' . $platformId . '>' . $platformOption . '</option>';
