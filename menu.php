@@ -16,8 +16,8 @@
             Idiomas
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Language/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Language/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/language/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/language/create.php">Registrar</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -26,8 +26,8 @@
             Actores
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Actor/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Actor/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/actor/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/actor/create.php">Registrar</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -36,8 +36,8 @@
             Directores
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Director/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Director/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/director/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/director/create.php">Registrar</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -46,8 +46,8 @@
             Plataformas
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Platform/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Platform/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/platform/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/platform/create.php">Registrar</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -56,8 +56,8 @@
             Series
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Serie/list.php">Listar</a></li>
-            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/Serie/create.php">Registrar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/serie/list.php">Listar</a></li>
+            <li><a class="dropdown-item" href="/04_masw_actividad_uno/views/serie/create.php">Registrar</a></li>
           </ul>
         </li>
       </ul>
