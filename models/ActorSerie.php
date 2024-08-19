@@ -63,7 +63,7 @@ class ActorSerie
 
             foreach ($actorIdsArray as $actorItemId) {
 
-                $this->setactorId($actorItemId);
+                $this->setActorId($actorItemId);
 
                 mysqli_stmt_execute($stmt);
             }
@@ -99,7 +99,7 @@ class ActorSerie
 
             foreach ($serieActorStatus as $actorItemId => $statusItem) {
 
-                $this->setactorId($actorItemId);
+                $this->setActorId($actorItemId);
 
                 $this->setStatus($statusItem);
 
@@ -120,7 +120,7 @@ class ActorSerie
     /**
      * Get the value of actorId
      */
-    public function getactorId()
+    public function getActorId()
     {
         return $this->actorId;
     }
@@ -130,7 +130,7 @@ class ActorSerie
      *
      * @return  self
      */
-    public function setactorId($actorId)
+    public function setActorId($actorId)
     {
         $this->actorId = $actorId;
 
