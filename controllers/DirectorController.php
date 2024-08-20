@@ -33,8 +33,8 @@ class DirectorController extends PersonController
         $directorSaved = $model->getById();
 
         if (!$directorSaved) {
-            $_SESSION['error_message'] = "Director [{$id}] no encontrado";
-            error_log("Database exception: ID del director no encontrado en la base de datos - [{$id}]");
+            error_log("Database exception: ID del/la director/a no encontrado en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Director/a [{$id}] no encontrado/a");
             return false;
         }
 
@@ -67,13 +67,13 @@ class DirectorController extends PersonController
     
             if ($directorSaved) {
     
-                $_SESSION['success_message'] = 'Director se ha registrado correctamente.';
+                Utilities::setSuccessMessage("Director/a se ha registrado correctamente.");
             }else{
 
                 $this->deletePerson($personId);
 
-                $_SESSION['error_message'] = 'La información del Director no se ha registrado correctamente.';
-                error_log("Database exception: Falló al guardar el director - Inicio de Carrera [{$beginningCareer}] Años activo [{$activeYears}] ID Persona [{$personId}]");
+                error_log("Database exception: Falló al guardar el/la director/a - Inicio de Carrera [{$beginningCareer}] Años activo [{$activeYears}] ID Persona [{$personId}]");
+                Utilities::setErrorMessage("La información del Director/a no se ha registrado correctamente.");
             }
         }
         return $directorSaved;
@@ -105,8 +105,8 @@ class DirectorController extends PersonController
             $this->handlePersonEditedMessage($personEdited);
             
         }else{
-            $_SESSION['error_message'] = "Director no se ha actualizado correctamente.";
-            error_log("Database exception: Fallo al editar el director - Id: [{$directorId}] Inicio de Carrera [{$beginningCareer}] Años activo [{$activeYears}] ID Persona [{$personId}]");
+            error_log("Database exception: Fallo al editar el director/a - Id: [{$directorId}] Inicio de Carrera [{$beginningCareer}] Años activo [{$activeYears}] ID Persona [{$personId}]");
+            Utilities::setErrorMessage("Director/a no se ha actualizado correctamente.");
         }
 
         return $directorEdited;
@@ -125,18 +125,18 @@ class DirectorController extends PersonController
         $directorDeleted = $model->getById();
 
         if (!$directorDeleted) {
-            $_SESSION['warning_message'] = "Director [{$id}] no registrado";
-            error_log("Database exception: ID del director no encontrado en la base de datos - [{$id}]");
+            error_log("Database exception: ID del director/a no encontrado/a en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Director/a [{$id}] no registrado/a");
             return $directorDeleted;
         }
 
         $directorDeleted = $this->deletePerson($directorDeleted->getPersonId());
 
         if ($directorDeleted) {
-            $_SESSION['success_message'] = "La información del Director [{$id}] se ha eliminado correctamente.";
+            Utilities::setSuccessMessage("La información del Director/a [{$id}] se ha eliminado correctamente.");
         }else {
-            $_SESSION['error_message'] = "La información del Director [{$id}] no se ha eliminado correctamente.";
-            error_log("Database exception: Falló al eliminar el director - ID Director [{$id}]");
+            error_log("Database exception: Falló al eliminar el director/a - ID Director [{$id}]");
+            Utilities::setErrorMessage("La información del Director/a [{$id}] no se ha eliminado correctamente.");
         }
 
         return $directorDeleted;
@@ -156,17 +156,17 @@ class DirectorController extends PersonController
 
     private function handlePersonEditedMessage(bool $personEdited){
         if ($personEdited) {
-            $_SESSION['success_message'] = 'Director y Datos Personales se han actualizado correctamente';
+            Utilities::setSuccessMessage("Director/a y Datos Personales se han actualizado correctamente");
         } else {
-            $_SESSION['error_message'] = 'Director actualizado, pero los datos personales no se han actualizado correctamente.';
+            Utilities::setErrorMessage("Director/a actualizado, pero los datos personales no se han actualizado correctamente.");
         }
     }
 
     private function hasValidDirectorIdType($id): bool
     {
         if (DirectorValidation::isInvalidIdDataType($id)) {
-            $_SESSION['error_message'] = "Director [{$id}] inválido";
-            error_log("Validation exception: ID del director inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
+            error_log("Validation exception: ID del/la director/a inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
+            Utilities::setErrorMessage("Director/a [{$id}] inválido/a");
             return false;
         }
         return true;
@@ -197,7 +197,7 @@ class DirectorController extends PersonController
         }
 
         if ($inputInvalid) {
-            $_SESSION['error_message'] = "Por favor verificar la información ingresada.";
+            Utilities::setErrorMessage("Por favor verificar la información ingresada.");
         }
 
         return $inputInvalid;

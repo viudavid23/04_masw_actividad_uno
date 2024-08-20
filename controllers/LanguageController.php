@@ -28,8 +28,8 @@ class LanguageController
         $languageSaved = $model->getById();
 
         if (!$languageSaved) {
-            $_SESSION['error_message'] = "Idioma [{$id}] no registrado";
             error_log("Database exception: ID de idioma no encontrado en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Idioma [{$id}] no registrado");
             return false;
         }
 
@@ -60,10 +60,10 @@ class LanguageController
         $languageSaved = $model->save();
 
         if ($languageSaved) {
-            $_SESSION['success_message'] = 'Idioma creado correctamente.';
+            Utilities::setSuccessMessage("Idioma creado correctamente.");
         } else {
-            $_SESSION['error_message'] = 'El Idioma no se ha creado correctamente.';
             error_log("Database exception: Fallo al guardar el idioma - Nombre [{$name}] ISO Code [{$isoCode}]");
+            Utilities::setErrorMessage("El Idioma no se ha creado correctamente.");
         }
 
         return $languageSaved;
@@ -87,10 +87,10 @@ class LanguageController
         $languageEdited = $model->update();
 
         if ($languageEdited) {
-            $_SESSION['success_message'] = 'Idioma editado correctamente.';
+            Utilities::setSuccessMessage("Idioma editado correctamente.");
         } else {
-            $_SESSION['error_message'] = 'El Idioma no se ha editado correctamente.';
             error_log("Database exception: Fallo al actualizar el idioma - ID [{$id}] Nombre [{$name}] ISO Code [{$isoCode}]");
+            Utilities::setErrorMessage("El Idioma no se ha editado correctamente.");
         }
 
         return $languageEdited;
@@ -109,18 +109,18 @@ class LanguageController
         $languageSaved = $model->getById();
 
         if (!$languageSaved) {
-            $_SESSION['warning_message'] = "Idioma [{$id}] no registrado";
             error_log("Database exception: ID de idioma no encontrado en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Idioma [{$id}] no registrado");
             return $languageDeleted;
         }
 
         $languageDeleted = $model->delete();
 
         if ($languageDeleted) {
-            $_SESSION['success_message'] = 'Idioma eliminado correctamente.';
+            Utilities::setSuccessMessage("Idioma eliminado correctamente.");
         } else {
-            $_SESSION['error_message'] = 'El Idioma no se ha eliminado correctamente.';
             error_log("Database exception: Fallo al eliminar el idioma - ID [{$id}]");
+            Utilities::setErrorMessage("El Idioma no se ha eliminado correctamente.");
         }
 
         return $languageDeleted;
@@ -150,7 +150,7 @@ class LanguageController
         }
 
         if ($inputInvalid) {
-            $_SESSION['error_message'] = "Por favor verificar las entradas, no son válidas.";
+            Utilities::setErrorMessage("Por favor verificar las entradas, no son válidas.");
             return $inputInvalid;
         }
 
@@ -158,8 +158,8 @@ class LanguageController
             $inputAlreadyRegister = $this->checkByIsoCode($isoCode);
 
             if ($inputAlreadyRegister) {
-                $_SESSION['warning_message'] = "Ya existe un idioma registrado para el ISO Code [{$isoCode}]";
                 error_log("Database exception: El idioma ya se encuentran registrado - Nombre [{$name}] ISO Code [{$isoCode}]");
+                Utilities::setWarningMessage("Ya existe un idioma registrado para el ISO Code [{$isoCode}]");
                 $inputInvalid = true;
             }
         }
@@ -170,8 +170,8 @@ class LanguageController
     function checkValidIdDataType($id): bool
     {
         if (LanguageValidation::isInvalidIdDataType($id)) {
-            $_SESSION['error_message'] = "Idioma [{$id}] inválido";
             error_log("Validation exception: ID de idioma inválido. Debe contener solo números - [{$id}]");
+            Utilities::setErrorMessage("Idioma [{$id}] inválido");
             return false;
         }
         return true;

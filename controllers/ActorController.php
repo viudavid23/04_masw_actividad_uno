@@ -32,8 +32,8 @@ class ActorController extends PersonController
         $actorSaved = $model->getById();
 
         if (!$actorSaved) {
-            $_SESSION['warning_message'] = "Actor/Actriz [{$id}] no registrado/a";
             error_log("Database exception: ID del actor/actriz no encontrado en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Actor/Actriz [{$id}] no registrado/a");
             return false;
         }
 
@@ -66,13 +66,13 @@ class ActorController extends PersonController
     
             if ($actorSaved) {
     
-                $_SESSION['success_message'] = 'La información del Actor/Actriz se ha registrado correctamente.';
+                Utilities::setSuccessMessage("La información del Actor/Actriz se ha registrado correctamente.");
             }else{
 
                 $this->deletePerson($personId);
 
-                $_SESSION['error_message'] = 'La información del Actor/Actriz no se ha registrado correctamente.';
                 error_log("Database exception: Falló al guardar el actor - Nombre Artístico [{$stageName}] Altura [{$height}] ID Persona [{$personId}]");
+                Utilities::setErrorMessage("La información del Actor/Actriz no se ha registrado correctamente.");
             }
         }
         return $actorSaved;
@@ -104,8 +104,8 @@ class ActorController extends PersonController
             $this->handlePersonEditedMessage($personEdited);
             
         }else{
-            $_SESSION['error_message'] = 'Actor/Actriz no se ha actualizado correctamente.';
             error_log("Database exception: Falló al editar el/la actor/actriz - Id: [{$actorId}] Nombre Artístico [{$stageName}] Altura [{$height}] ID Persona [{$personId}]");
+            Utilities::setErrorMessage("Actor/Actriz no se ha actualizado correctamente.");
         }
 
         return $actorEdited;
@@ -124,18 +124,18 @@ class ActorController extends PersonController
         $actorDeleted = $model->getById();
 
         if (!$actorDeleted) {
-            $_SESSION['warning_message'] = "Actor/Actriz [{$id}] no registrado";
             error_log("Database exception: ID del actor/actriz no encontrada en la base de datos - [{$id}]");
+            Utilities::setWarningMessage("Actor/Actriz [{$id}] no registrado");
             return $actorDeleted;
         }
 
         $actorDeleted = $this->deletePerson($actorDeleted->getPersonId());
 
         if ($actorDeleted) {
-            $_SESSION['success_message'] = 'La información del Actor/Actriz se ha eliminado correctamente.';
+            Utilities::setSuccessMessage("La información del Actor/Actriz se ha eliminado correctamente.");
         }else {
-            $_SESSION['error_message'] = 'La información del Actor/Actriz no se ha eliminado correctamente.';
             error_log("Database exception: Falló al eliminar el/la actor/actriz - ID Actor/Actriz [{$id}]");
+            Utilities::setErrorMessage("La información del Actor/Actriz no se ha eliminado correctamente.");
         }
 
         return $actorDeleted;
@@ -155,17 +155,17 @@ class ActorController extends PersonController
 
     private function handlePersonEditedMessage(bool $personEdited){
         if ($personEdited) {
-            $_SESSION['success_message'] = 'Actor/Actriz y Datos Personales se han actualizado correctamente';
+            Utilities::setSuccessMessage("Actor/Actriz y Datos Personales se han actualizado correctamente");
         } else {
-            $_SESSION['error_message'] = 'Actor/Actriz actualizado, pero los datos personales no se han actualizado correctamente.';
+            Utilities::setErrorMessage("Actor/Actriz actualizado, pero los datos personales no se han actualizado correctamente.");
         }
     }
 
     private function hasValidActorIdType($id): bool
     {
         if (ActorValidation::isInvalidIdDataType($id)) {
-            $_SESSION['error_message'] = "Actor/Actriz [{$id}] inválido";
             error_log("Validation exception: ID del actor/actriz inválido. Debe contener solo números y ser mayor a cero - [{$id}]");
+            Utilities::setErrorMessage("Actor/Actriz [{$id}] inválido");
             return false;
         }
         return true;
@@ -196,7 +196,7 @@ class ActorController extends PersonController
         }
 
         if ($inputInvalid) {
-            $_SESSION['error_message'] = "Por favor verificar la información ingresada.";
+            Utilities::setErrorMessage("Por favor verificar la información ingresada.");
         }
 
         return $inputInvalid;
