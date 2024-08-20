@@ -6,15 +6,20 @@ require_once '../../controllers/LanguageController.php';
 $controller = new LanguageController();
 
 $sendData = false;
+$errorOccurred = false;
 
 $languageId = $_GET['id'];
 
 $languageSaved = $controller->showById($languageId);
 
+if (is_bool($languageSaved) && !$languageSaved) {
+    $errorOccurred = true;
+}
+
 if (isset($_POST['editBtn'])) {
     $sendData = true;
 }
-if ($sendData) {
+if ($sendData && !$errorOccurred) {
 
     $languageEdited = $controller->edit($languageId, $_POST['name'], $_POST['iso']);
 
@@ -42,7 +47,7 @@ if ($sendData) {
             <h2 class="h2">Edición de Idiomas</h2>
             <?php
 
-            if (is_bool($languageSaved)) {
+            if ($errorOccurred) {
 
                 if (isset($_SESSION['error_message'])) {
             ?>
@@ -54,76 +59,87 @@ if ($sendData) {
                 <?php
                     unset($_SESSION['error_message']);
                 }
-                exit;
-            }
-
-            if (!$sendData) {
-                ?>
-                <div class="row">
-                    <div class="alert alert-info" role="alert">
-                        Actualice los campos para editar el idioma.
-                    </div>
-                </div>
-                <?php
-            } else {
-
-                if (isset($_SESSION['error_message'])) {
-                ?>
-                    <div class="row">
-                        <div class="alert alert-danger" role="alert">
-                            <?php echo $_SESSION['error_message'] ?> <br><a href="edit.php?id=<?php echo $languageId; ?>">Volver Intentarlo</a>
-                        </div>
-                    </div>
-                <?php
-                    unset($_SESSION['error_message']);
-                }
 
                 if (isset($_SESSION['warning_message'])) {
                 ?>
                     <div class="row">
                         <div class="alert alert-warning" role="alert">
-                            <?php echo $_SESSION['warning_message'] ?> <br><a href="edit.php?id=<?php echo $languageId; ?>">Volver Intentarlo</a>
+                            <?php echo $_SESSION['warning_message'] ?> <br><a href="list.php">Volver al listado de Series</a>
                         </div>
                     </div>
                 <?php
                     unset($_SESSION['warning_message']);
                 }
+            } else {
 
-
-                if (isset($_SESSION['success_message'])) {
+                if (!$sendData) {
                 ?>
                     <div class="row">
-                        <div class="alert alert-success" role="alert">
-                            <?php echo $_SESSION['success_message'] ?>
+                        <div class="alert alert-info" role="alert">
+                            Actualice los campos para editar el idioma.
                         </div>
                     </div>
-            <?php
-                    unset($_SESSION['success_message']);
+                    <?php
+                } else {
+
+                    if (isset($_SESSION['error_message'])) {
+                    ?>
+                        <div class="row">
+                            <div class="alert alert-danger" role="alert">
+                                <?php echo $_SESSION['error_message'] ?> <br><a href="edit.php?id=<?php echo $languageId; ?>">Volver Intentarlo</a>
+                            </div>
+                        </div>
+                    <?php
+                        unset($_SESSION['error_message']);
+                    }
+
+                    if (isset($_SESSION['warning_message'])) {
+                    ?>
+                        <div class="row">
+                            <div class="alert alert-warning" role="alert">
+                                <?php echo $_SESSION['warning_message'] ?> <br><a href="edit.php?id=<?php echo $languageId; ?>">Volver Intentarlo</a>
+                            </div>
+                        </div>
+                    <?php
+                        unset($_SESSION['warning_message']);
+                    }
+
+
+                    if (isset($_SESSION['success_message'])) {
+                    ?>
+                        <div class="row">
+                            <div class="alert alert-success" role="alert">
+                                <?php echo $_SESSION['success_message'] ?>
+                            </div>
+                        </div>
+                <?php
+                        unset($_SESSION['success_message']);
+                    }
                 }
-            }
-            ?>
-            <div class="row mb-3">
-                <div class="col">
-                    <label class="form-label">Id:</label>
-                    <input type="text" class="form-control" name="id" value="<?php echo $languageId ?>" disabled>
+                ?>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Id:</label>
+                        <input type="text" class="form-control" name="id" value="<?php echo $languageId ?>" disabled>
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <label class="form-label">Nombre:</label>
-                    <input type="text" class="form-control" name="name" placeholder="Inglés" pattern="[a-zA-ZÀ-ÿ\s]+" title="Nombre inválido." value="<?php echo $languageSaved->getName(); ?>" required>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Nombre:</label>
+                        <input type="text" class="form-control" name="name" placeholder="Inglés" pattern="[a-zA-ZÀ-ÿ\s]+" title="Nombre inválido." value="<?php echo $languageSaved->getName(); ?>" required>
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <label class="form-label">Código ISO:</label>
-                    <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[a-zA-Z0-9]{2,3}" title="Código ISO inválido." value="<?php echo $languageSaved->getIsoCode(); ?>" required>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Código ISO:</label>
+                        <input type="text" class="form-control" name="iso" placeholder="ISO 3166-1" pattern="[a-zA-Z0-9]{2,3}" title="Código ISO inválido." value="<?php echo $languageSaved->getIsoCode(); ?>" required>
+                    </div>
                 </div>
-            </div>
-            <div>
-                <button type="submit" class="btn btn-primary" name="editBtn">Editar</button>
-                <a href="list.php" class="btn btn-danger">Cancelar</a>
-            </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" name="editBtn">Editar</button>
+                    <a href="list.php" class="btn btn-danger">Cancelar</a>
+                </div>
+            <?php } ?>
         </form>
     </div>
     <script src="../../assets/js/jquery-3.6.0.min.js"></script>
