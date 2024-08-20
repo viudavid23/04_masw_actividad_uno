@@ -2,6 +2,7 @@
 require_once '../../utils/SessionStart.php';
 require_once '../../utils/Utilities.php';
 require_once('../../models/Serie.php');
+require_once('exceptions/RecordNotFoundException.php');
 require_once('validations/CommonValidation.php');
 require_once('validations/SerieValidation.php');
 require_once('PlatformSerieController.php');
@@ -26,7 +27,7 @@ class SerieController
             array_push($serieObjectArray, $serieObject);
         }
 
-        return $serieModelList;
+        return $serieObjectArray;
     }
 
     function showById($id): mixed
@@ -38,18 +39,22 @@ class SerieController
             $serieSaved = $model->getById();
 
             if (!$serieSaved) {
-                error_log("[SerieController] [Data Error] ID de la serie no encontrado en la base de datos - [{$id}]");
-                throw new RuntimeException("Serie [{$id}] no registrada", Constants::NOT_FOUND_CODE);
+                error_log("[SerieController] [Data Error] ID de la serie no encontrado en la tabla serie de la base de datos - [{$id}]");
+                throw new RecordNotFoundException("Serie [{$id}] no registrada");
             }
 
             return $this->makeSerie($serieSaved);
+        } catch (RecordNotFoundException $e) {
+            error_log("[SerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setWarningMessage($e->getMessage());
+            return false;
         } catch (InvalidArgumentException $e) {
             error_log("[SerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
             Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[SerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
+            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
@@ -87,7 +92,7 @@ class SerieController
                 }
             }
 
-            error_log("[SerieController] [Data Error] Falló al guardar la serie - Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}]");
+            error_log("[SerieController] [Data Error] Falló al guardar en la tabla serie - Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}]");
             throw new RuntimeException("La Serie [{$title}] no se ha creado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
         } catch (InvalidArgumentException $e) {
             error_log("[SerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
@@ -115,24 +120,19 @@ class SerieController
             $serieEdited = $model->update();
 
             if ($serieEdited) {
+                $serieComponentsEdited = $this->updateSerieComponents($id, $serieData);
 
-                $platformIds = $serieData[self::SERIE_PLATFORMS];
-
-                if ($this->editPlatformSeries($id, $platformIds)) {
-                    Utilities::setSuccessMessage("Serie [{$title}] editada correctamente.");
-                    return true;
+                if (!$serieComponentsEdited) {
+                    error_log("[SerieController] [Data Error] Falló al actualizar la tabla serie - Id: [{$id}] Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Plataformas: " . implode(',', $serieData[self::SERIE_PLATFORMS]) . " Actores/Actrices: " . implode(',', $serieData[self::SERIE_ACTORS]));
+                    return false;
                 }
-            }
 
-            error_log("[SerieController] [Data Error] Falló al actualizar la serie - Id: [{$id}]  Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Plataformas: [{$platformIds}]");
-            throw new RuntimeException("La Serie [{$title}] no se ha editado correctamente.");
+                Utilities::setSuccessMessage("Serie [{$title}] editada correctamente.");
+                return true;
+            }
         } catch (InvalidArgumentException $e) {
             error_log("[SerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
             Utilities::setErrorMessage($e->getMessage());
-            return false;
-        } catch (RuntimeException $e) {
-            error_log("[SerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
             return false;
         }
     }
@@ -149,12 +149,12 @@ class SerieController
             $serieDeleted = $model->delete();
 
             if ($serieDeleted) {
-                
+
                 Utilities::setSuccessMessage("Serie [{$id}] eliminada correctamente.");
                 return true;
             }
 
-            error_log("[SerieController] [Data Error] Falló al eliminar la Serie - ID [{$id}]");
+            error_log("[SerieController] [Data Error] Falló al eliminar registro de la tabla serie - ID [{$id}]");
             throw new RuntimeException("La Serie [{$id}] no se ha eliminado correctamente.");
         } catch (InvalidArgumentException $e) {
             error_log("[SerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
@@ -167,6 +167,11 @@ class SerieController
         }
     }
 
+    /**
+     * Construye un objeto Serie.
+     * @param Serie $source Modelo Serie.
+     * @return Serie generado a partir del modelo.
+     */
     private function makeSerie(Serie $source): Serie
     {
         return new Serie(
@@ -177,6 +182,84 @@ class SerieController
         );
     }
 
+    /**
+     * Actualiza los componentes de una serie: plataformas, actores, directores, idiomas de audio y subtitulos.
+     * 
+     * @param int $serieId El ID de la serie.
+     * @param array $serieData Los datos de la serie.
+     * @return bool True si la actualización fue exitosa, false si falló.
+     */
+    private function updateSerieComponents(int $serieId, array $serieData): bool
+    {
+        $platformIds = $serieData[self::SERIE_PLATFORMS];
+        $actorIds = $serieData[self::SERIE_ACTORS];
+
+        if (!$this->editPlatformSeries($serieId, $platformIds)) {
+            error_log("[SerieController] [Data Error] Falló al actualizar las plataformas de la serie - Id: [{$serieId}]");
+            return false;
+        }
+
+        if (!$this->editActorSeries($serieId, $actorIds)) {
+            error_log("[SerieController] [Data Error] Falló al actualizar los actores/actrices de la serie - Id: [{$serieId}]");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Crea registros para las plataformas de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $platformIds IDs de las plataformas de la serie.
+     * @return bool True si la creación fue exitosa, false si falló.
+     */
+    private function createPlatformSeries(int $serieId, array $platformIds): bool
+    {
+        $platformSerieController = new PlatformSerieController();
+        return $platformSerieController->create($serieId, $platformIds);
+    }
+
+    /**
+     * Edita registros para las plataformas de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $platformIds IDs de las plataformas de la serie.
+     * @return bool True si la edición fue exitosa, false si falló.
+     */
+    private function editPlatformSeries(int $serieId, array $platformIds): bool
+    {
+        $platformSerieController = new PlatformSerieController();
+        return $platformSerieController->edit($serieId, $platformIds);
+    }
+
+    /**
+     * Crea registros para los actores/actrices de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $actorIds IDs de los actores/actrices de la serie.
+     * @return bool True si la creación fue exitosa, false si falló.
+     */
+    private function createActorSeries(int $serieId, array $actorIds): bool
+    {
+        $actorSerieController = new ActorSerieController();
+        return $actorSerieController->create($serieId, $actorIds);
+    }
+
+    /**
+     * Edita registros para los actores/actrices de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $actorIds IDs de los actores/actrices de la serie.
+     * @return bool True si la edición fue exitosa, false si falló.
+     */
+    private function editActorSeries(int $serieId, array $actorIds): bool
+    {
+        $actorSerieController = new ActorSerieController();
+        return $actorSerieController->edit($serieId, $actorIds);
+    }
+
+    /**
+     * Valida el tipo de dato del ID de la serie.
+     * @param int $id EL ID de la serie.
+     * @throws InvalidArgumentException si no cumple con el formato establecido.
+     */
     private function checkValidIdDataType($id): void
     {
         if (SerieValidation::isInvalidIdDataType($id)) {
@@ -185,25 +268,11 @@ class SerieController
         }
     }
 
-    private function createPlatformSeries(int $serieId, array $platformIds): bool
-    {
-        $platformSerieController = new PlatformSerieController();
-        return $platformSerieController->create($serieId, $platformIds);
-    }
-
-    private function editPlatformSeries(int $serieId, array $platformIds): bool
-    {
-        $platformSerieController = new PlatformSerieController();
-        return $platformSerieController->edit($serieId, $platformIds);
-    }
-
-    private function createActorSeries(int $serieId, array $actorIds): bool
-    {
-        $actorSerieController = new ActorSerieController();
-        return $actorSerieController->create($serieId, $actorIds);
-    }
-
-
+    /**
+     * Valida el tipo de dato de los componentes de una serie.
+     * @param array $serieData Los datos de la serie.
+     * @throws InvalidArgumentException si no cumple con el formato establecido.
+     */
     private function checkValidInputFields($serieData): void
     {
         $inputInvalid = false;
@@ -223,13 +292,6 @@ class SerieController
         $releaseDate = $serieData[self::SERIE_RELEASE_DATE];
         if (empty($releaseDate) || CommonValidation::isInvalidDate($releaseDate)) {
             error_log("[SerieController] [Validation Error] Fecha de lanzamiento no enviada o no cumple con un formato de fecha aceptado - [{$releaseDate}]");
-            $inputInvalid = true;
-        }
-
-        $platformSerieData = $serieData[self::SERIE_PLATFORMS];
-        if (CommonValidation::isInvalidIntegerList($platformSerieData)) {
-            $platformIdsEncode = json_encode($platformSerieData);
-            error_log("[SerieController] [Validation Error] Listado de plataformas no enviado o no contiene solo números enteros positivos - [{$platformIdsEncode}]");
             $inputInvalid = true;
         }
 
