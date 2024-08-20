@@ -93,6 +93,10 @@ if ($sendData) {
                 }
             }
             ?>
+            <div class="row">
+                <h5>Datos Personales</h5>
+                <hr>
+            </div>
             <div class="col-md-6">
                 <div class="form-group mb-3">
                     <label for="primerNombre">Primer Nombre <span class="required">*</span></label>
@@ -132,6 +136,10 @@ if ($sendData) {
                         ?>
                     </select>
                 </div>
+            </div>
+            <div class="row">
+                <h5>Datos Actor/Actriz</h5>
+                <hr>
             </div>
             <div class="col-md-6">
                 <div class="form-group mb-3">

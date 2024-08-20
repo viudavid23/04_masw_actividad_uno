@@ -52,7 +52,7 @@ if ($sendData) {
             ?>
                 <div class="row">
                     <div class="alert alert-info" role="alert">
-                        Diligencie los campos para registrar un nuevo director.
+                        Diligencie los campos para registrar un nuevo/a director/a.
                     </div>
                 </div>
                 <?php
@@ -93,6 +93,10 @@ if ($sendData) {
                 }
             }
             ?>
+            <div class="row">
+                <h5>Datos Personales</h5>
+                <hr>
+            </div>
             <div class="col-md-6">
                 <div class="form-group mb-3">
                     <label for="primerNombre">Primer Nombre <span class="required">*</span></label>
@@ -114,7 +118,7 @@ if ($sendData) {
             <div class="col-md-6">
                 <div class="form-group mb-4">
                     <label for="nacionalidades">Nacionalidad <span class="required">*</span></label>
-                    <select class="form-control" id="nacionalidades" name="nationality">
+                    <select class="form-select" id="nacionalidades" name="nationality">
                         <option selected>Seleccione...</option>
                         <?php
 
@@ -132,6 +136,10 @@ if ($sendData) {
                         ?>
                     </select>
                 </div>
+            </div>
+            <div class="row">
+                <h5>Datos Director/a</h5>
+                <hr>
             </div>
             <div class="col-md-6">
                 <div class="form-group mb-3">
