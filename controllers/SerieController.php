@@ -168,6 +168,42 @@ class SerieController
     }
 
     /**
+     * Obtiene el listado de series activas de una plataforma.
+     * @param int $platformId ID de la plataforma.
+     * @return string Listado de opciones de menu para las series de una plataforma.
+     */
+    function getSeriesListByPlatform($platformId): string
+    {
+
+        $options = '';
+        $withoutOrInactiveRecords = '<li class="list-group-item">No se encontraron series</li>';
+
+        $platformSerieController = new PlatformSerieController();
+
+        $platformSerieList = $platformSerieController->showByPlatformId($platformId);
+
+        if (is_bool($platformSerieList) && !$platformSerieList) {
+            
+            $options .= $withoutOrInactiveRecords;
+        } else {
+            foreach ($platformSerieList as $platformSerieItem) {
+                if ($platformSerieItem->getStatus() == 1) {
+
+                    $serie = $this->showById($platformSerieItem->getSerieId());
+                    $seriesPlatformOption = Utilities::concatStrings("[", $serie->getId(), "]", " - ", $serie->getTitle());
+
+                    $options .= '<li class="list-group-item">' . $seriesPlatformOption . '</li>';
+                }else {
+                    $options .= $withoutOrInactiveRecords;
+                }
+            }
+        }
+
+        return $options;
+    }
+
+
+    /**
      * Construye un objeto Serie.
      * @param Serie $source Modelo Serie.
      * @return Serie generado a partir del modelo.
