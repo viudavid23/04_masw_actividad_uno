@@ -43,6 +43,25 @@ class PlatformSerie
         return $listData;
     }
 
+    public function getByPlatformId(): mixed
+    {
+        $dbManager = new DBManager();
+        $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_PLATFORM_ID));
+        $stmt->bind_param('i', $this->platformId);
+        $stmt->execute();
+        $resultSet = $stmt->get_result();
+        $listData = [];
+
+        foreach ($resultSet as $item) {
+            $platfformSerie = new PlatformSerie($item[self::COLUMN_PLATFORM_ID], $item[self::COLUMN_SERIE_ID], $item[self::COLUMN_STATUS]);
+            array_push($listData, $platfformSerie);
+        }
+
+        $this->cleanConnection($stmt, $dbManager);
+
+        return $listData;
+    }
+
     public function save($platformIdsArray): bool
     {
         $created = false;

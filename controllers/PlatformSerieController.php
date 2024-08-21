@@ -9,6 +9,9 @@ class PlatformSerieController
 
     function showBySerieId($serieId): mixed
     {
+
+        $platformSerieObject = [];
+
         try {
             $this->checkValidSerieIdDataType($serieId);
 
@@ -22,7 +25,39 @@ class PlatformSerieController
                 return false;
             }
 
-            return $platformSerieSaved;
+            foreach($platformSerieSaved as $platformSerie) {
+                $platformSerieObject[] =  new PlatformSerie($platformSerie->getPlatformId(), $platformSerie->getSerieId(), $platformSerie->getStatus());
+            }
+
+            return $platformSerieObject;
+        } catch (InvalidArgumentException $e) {
+            error_log("[PlatformSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    function showByPlatformId($platformId): mixed
+    {
+        $platformSerieObject = [];
+
+        try {
+            $this->checkValidSerieIdDataType($platformId);
+
+            $model = new PlatformSerie($platformId, null);
+
+            $platformSerieSaved = $model->getByPlatformId();
+            
+            if (count($platformSerieSaved) == 0) {
+                error_log("[PlatformSerieController] [Data Error] ID de la plataforma no encontrado en la tabla platform_serie de la base de datos - [{$platformId}]");
+                Utilities::setWarningMessage("Plataforma [{$platformId}] no registrada", Constants::NOT_FOUND_CODE);
+                return false;
+            }
+
+            foreach($platformSerieSaved as $platformSerie) {
+                $platformSerieObject[] =  new PlatformSerie($platformSerie->getPlatformId(), $platformSerie->getSerieId(), $platformSerie->getStatus());
+            }
+
+            return $platformSerieObject;
         } catch (InvalidArgumentException $e) {
             error_log("[PlatformSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
             return false;
@@ -221,4 +256,5 @@ class PlatformSerieController
 
         return $options;
     }
+
 }
