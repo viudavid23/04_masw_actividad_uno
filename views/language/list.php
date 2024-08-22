@@ -40,6 +40,7 @@
                         <tbody>
                             <?php
                             foreach ($languageList as $item) {
+                                $uniqueModalId = "deleteLanguageModal" . $item->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $item->getId() ?></td>
@@ -51,10 +52,30 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $item->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-                                            <form name="delete_language" action="delete.php" method="POST">
-                                                <input type="hidden" name="languageId" value="<?php echo $item->getId(); ?>" />
-                                                <button type="submit" class="btn btn-danger">Eliminar</button>
-                                            </form>
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#<?php echo $uniqueModalId; ?>">Eliminar</button>
+                                            <!-- Modal Confirmación-->
+                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalTextLabel">Eliminación de Idioma <strong><?php echo $item->getName(); ?></strong></h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Está acción eliminará el idioma y sus relaciones con las series.
+                                                            ¿Desea continuar?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+                                                            <form name="delete_language" action="delete.php" method="POST">
+                                                                <input type="hidden" name="languageId" value="<?php echo $item->getId(); ?>" />
+                                                                <button type="submit" class="btn btn-primary">Confirmar</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

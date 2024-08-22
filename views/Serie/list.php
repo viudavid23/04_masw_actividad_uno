@@ -45,6 +45,7 @@
 
                                 $serie = $serieController->showById($serie->getId());
                                 $serie->setReleaseDate(Utilities::changeDateFormat($serie->getReleaseDate(), Constants::DATE_OUTPUT_FORMAT));
+                                $uniqueModalId = "deleteSerieModal" . $serie->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $serie->getId(); ?></td>
@@ -57,9 +58,9 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $serie->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Eliminar</button>
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#<?php echo $uniqueModalId; ?>">Eliminar</button>
                                             <!-- Modal Confirmación-->
-                                            <div class="modal fade" id="deleteConfirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">

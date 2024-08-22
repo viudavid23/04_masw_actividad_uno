@@ -54,6 +54,7 @@
                                 $person->setBirthdate(Utilities::changeDateFormat($person->getBirthdate(), Constants::DATE_OUTPUT_FORMAT));
                                 $director->setBeginningCareer(Utilities::changeDateFormat($director->getBeginningCareer(), Constants::DATE_OUTPUT_FORMAT));
                                 $country = $countryController->showById($person->getCountryId());
+                                $uniqueModalId = "deleteDirectorModal" . $director->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $director->getId(); ?></td>
@@ -71,10 +72,31 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $director->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-                                            <form name="delete_director" action="delete.php" method="POST">
-                                                <input type="hidden" name="directorId" value="<?php echo $director->getId(); ?>" />
-                                                <button type="submit" class="btn btn-danger">Eliminar</button>
-                                            </form>
+
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#<?php echo $uniqueModalId; ?>">Eliminar</button>
+                                            <!-- Modal Confirmación-->
+                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalTextLabel">Eliminación de Director/a <strong><?php echo $person->getFirstName() . " " . $person->getLastName(); ?></strong></h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Está acción eliminará los/as directores/as de todas las series.
+                                                            ¿Desea continuar?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+                                                            <form name="delete_director" action="delete.php" method="POST">
+                                                                <input type="hidden" name="serieId" value="<?php echo $director->getId(); ?>" />
+                                                                <button type="submit" class="btn btn-primary">Confirmar</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
