@@ -21,7 +21,6 @@ class PlatformSerieController
 
             if (count($platformSerieSaved) == 0) {
                 error_log("[PlatformSerieController] [Data Error] ID de la serie no encontrado en la tabla platform_serie de la base de datos - [{$serieId}]");
-                Utilities::setWarningMessage("Serie [{$serieId}] no registrada", Constants::NOT_FOUND_CODE);
                 return false;
             }
 
@@ -46,10 +45,9 @@ class PlatformSerieController
             $model = new PlatformSerie($platformId, null);
 
             $platformSerieSaved = $model->getByPlatformId();
-            
+
             if (count($platformSerieSaved) == 0) {
                 error_log("[PlatformSerieController] [Data Error] ID de la plataforma no encontrado en la tabla platform_serie de la base de datos - [{$platformId}]");
-                Utilities::setWarningMessage("Plataforma [{$platformId}] no registrada", Constants::NOT_FOUND_CODE);
                 return false;
             }
 
@@ -83,15 +81,12 @@ class PlatformSerieController
             throw new RuntimeException("Las plataformas [{$platformIdsDecode}] de la serie [{$serieId}] no se han creado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
         } catch (RecordNotFoundException $e) {
             error_log("[ActorSerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
             return false;
         } catch (InvalidArgumentException $e) {
             error_log("[PlatformSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[PlatformSerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
@@ -128,15 +123,12 @@ class PlatformSerieController
             throw new RuntimeException("Las plataformas [{$platformIdsDecode}] de la serie [{$serieId}] no se han editado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
         } catch (RecordNotFoundException $e) {
             error_log("[PlatformSerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
             return false;
         } catch (InvalidArgumentException $e) {
             error_log("[PlatformSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[PlatformSerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
@@ -175,7 +167,6 @@ class PlatformSerieController
 
         if (!$serieSaved) {
             error_log("[PlatformSerieController] [Data Error] Serie no encontrada en la tabla platform_serie de la base de datos - SERIE_ID [{$id}]");
-            $_SESSION['warning_message'] = "Serie [{$id}] no registrada";
             return $serieDeleted;
         }
 
@@ -226,6 +217,8 @@ class PlatformSerieController
 
     function getPlatformOptions(int $serieId): string
     {
+        $options = '';
+
         $platformController = new PlatformController();
 
         $platformSerieList = $this->showBySerieId($serieId);
@@ -234,14 +227,13 @@ class PlatformSerieController
 
         $selectedPlatformIds = [];
         if (isset($platformSerieList) && !empty($platformSerieList)) {
+
             foreach ($platformSerieList as $platformSerieItem) {
                 if ($platformSerieItem->getStatus() == 1) {
                     $selectedPlatformIds[] = $platformSerieItem->getPlatformId();
                 }
             }
         }
-
-        $options = '';
 
         foreach ($platformsList as $itemPlatform) {
             $platformId = $itemPlatform->getId();

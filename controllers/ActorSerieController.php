@@ -18,7 +18,6 @@ class ActorSerieController
 
             if (count($actorSerieSaved) == 0) {
                 error_log("[ActorSerieController] [Data Error] ID de la serie no encontrado en la tabla actor_serie de base de datos - [{$serieId}]");
-                Utilities::setWarningMessage("Serie [{$serieId}] no registrada", Constants::NOT_FOUND_CODE);
                 return false;
             }
 
@@ -48,15 +47,12 @@ class ActorSerieController
             throw new RuntimeException("Los/as actores/actrices [{$actorIdsDecode}] de la serie [{$serieId}] no se han creado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
         } catch (RecordNotFoundException $e) {
             error_log("[ActorSerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
             return false;
         } catch (InvalidArgumentException $e) {
             error_log("[ActorSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[ActorSerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
@@ -92,15 +88,12 @@ class ActorSerieController
             throw new RuntimeException("Los/as actores/actrices [{$actorIdsDecode}] de la serie [{$serieId}] no se han editado correctamente.", Constants::INTERNAL_SERVER_ERROR_CODE);
         } catch (RecordNotFoundException $e) {
             error_log("[ActorSerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
             return false;
         } catch (InvalidArgumentException $e) {
             error_log("[ActorSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[ActorSerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
