@@ -2,6 +2,7 @@
 require_once '../../utils/SessionStart.php';
 require_once '../../utils/Utilities.php';
 require_once('exceptions/RecordNotFoundException.php');
+require_once('validations/SerieValidation.php');
 require_once('../../models/ActorSerie.php');
 require_once('ActorController.php');
 class ActorSerieController
@@ -28,13 +29,33 @@ class ActorSerieController
         }
     }
 
+    function showByActorId($actorId): mixed
+    {
+        try {
+            $this->checkValidSerieIdDataType($actorId);
+
+            $model = new ActorSerie($actorId, null);
+
+            $actorSerieSaved = $model->getByActorId();
+
+            if (count($actorSerieSaved) == 0) {
+                error_log("[ActorSerieController] [Data Error] ID del actor/actriz no encontrado en la tabla actor_serie de base de datos - [{$actorId}]");
+                return false;
+            }
+
+            return $actorSerieSaved;
+        } catch (InvalidArgumentException $e) {
+            error_log("[ActorSerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            return false;
+        }
+    }
+
     function create($serieId, $actorIdsData): bool
     {
         try {
             $this->checkValidSerieIdDataType($serieId);
             $this->checkValidActorSerieInputFields($actorIdsData);
-            $this->checkValidActor($actorIdsData);
-
+            
             $model = new ActorSerie(null, $serieId);
             $actorSerieSaved = $model->save($actorIdsData);
 
@@ -201,5 +222,26 @@ class ActorSerieController
         }
 
         return $options;
+    }
+
+    function checkActiveActorSeries($actorId): bool
+    {
+        $hasActiveSeries = false;
+
+        $actorSerieList = $this->showByActorId($actorId);
+
+        if (isset($actorSerieList) && !empty($actorSerieList)) {
+
+            foreach ($actorSerieList as $actorSerieItem) {
+                if ($actorSerieItem->getStatus() == 1) {
+                    error_log("No se puede eliminar el/la actor/actriz de la tabla actor, tiene series activas en la tabla actor_serie - ACTOR_ID: {$actorId}");
+                    Utilities::setWarningMessage("El actor/actriz tiene series asociadas");
+                    $hasActiveSeries = true;
+                    break;
+                }
+            }
+        }
+
+        return $hasActiveSeries;
     }
 }
