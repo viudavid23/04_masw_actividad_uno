@@ -7,6 +7,7 @@ require_once('validations/CommonValidation.php');
 require_once('validations/SerieValidation.php');
 require_once('PlatformSerieController.php');
 require_once('ActorSerieController.php');
+require_once('DirectorSerieController.php');
 class SerieController
 {
     const SERIE_TITLE = 'title';
@@ -14,6 +15,7 @@ class SerieController
     const SERIE_RELEASE_DATE = 'release_date';
     const SERIE_PLATFORMS = 'platforms';
     const SERIE_ACTORS = 'actors';
+    const SERIE_DIRECTORS = 'directors';
 
     function showAll(): array
     {
@@ -70,6 +72,7 @@ class SerieController
             $releaseDate = $serieData[self::SERIE_RELEASE_DATE];
             $platformIds = $serieData[self::SERIE_PLATFORMS];
             $actorIds = $serieData[self::SERIE_ACTORS];
+            $directorIds = $serieData[self::SERIE_DIRECTORS];
 
             $serieModel = new Serie(null, $title, $synopsis, $releaseDate);
             $serieSaved = $serieModel->save();
@@ -78,7 +81,7 @@ class SerieController
 
                 $serieId = $serieSaved->getId();
 
-                if ($this->createPlatformSeries($serieId, $platformIds) && $this->createActorSeries($serieId, $actorIds)) {
+                if ($this->createPlatformSeries($serieId, $platformIds) && $this->createActorSeries($serieId, $actorIds) && $this->createDirectorSeries($serieId, $directorIds)) {
 
                     Utilities::setSuccessMessage("Serie [{$title}] creada correctamente.");
                     return true;
@@ -123,7 +126,7 @@ class SerieController
                 $serieComponentsEdited = $this->updateSerieComponents($id, $serieData);
 
                 if (!$serieComponentsEdited) {
-                    error_log("[SerieController] [Data Error] Falló al actualizar la tabla serie - Id: [{$id}] Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Plataformas: " . implode(',', $serieData[self::SERIE_PLATFORMS]) . " Actores/Actrices: " . implode(',', $serieData[self::SERIE_ACTORS]));
+                    error_log("[SerieController] [Data Error] Falló al actualizar la tabla serie - Id: [{$id}] Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Plataformas: " . implode(',', $serieData[self::SERIE_PLATFORMS]) . " Actores/Actrices: " . implode(',', $serieData[self::SERIE_ACTORS]) . " Directores/as: " . implode(',', $serieData[self::SERIE_DIRECTORS]));
                     return false;
                 }
 
@@ -143,7 +146,11 @@ class SerieController
 
             $this->checkValidIdDataType($id);
 
-            $this->showById($id);
+            $serieSaved = $this->showById($id);
+
+            if (is_bool($serieSaved) && !$serieSaved){
+                return $serieSaved;
+            }
 
             $model = new Serie($id);
             $serieDeleted = $model->delete();
@@ -156,13 +163,17 @@ class SerieController
 
             error_log("[SerieController] [Data Error] Falló al eliminar registro de la tabla serie - ID [{$id}]");
             throw new RuntimeException("La Serie [{$id}] no se ha eliminado correctamente.");
+        } catch (RecordNotFoundException $e) {
+            error_log("[SerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
+            Utilities::setWarningMessage($e->getMessage());
+            return false;
         } catch (InvalidArgumentException $e) {
             error_log("[SerieController] [Invalid Argument Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
             Utilities::setErrorMessage($e->getMessage());
             return false;
         } catch (RuntimeException $e) {
             error_log("[SerieController] [Runtime Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
-            Utilities::setWarningMessage($e->getMessage());
+            Utilities::setErrorMessage($e->getMessage());
             return false;
         }
     }
@@ -183,7 +194,7 @@ class SerieController
         $platformSerieList = $platformSerieController->showByPlatformId($platformId);
 
         if (is_bool($platformSerieList) && !$platformSerieList) {
-            
+
             $options .= $withoutOrInactiveRecords;
         } else {
             foreach ($platformSerieList as $platformSerieItem) {
@@ -193,15 +204,87 @@ class SerieController
                     $seriesPlatformOption = Utilities::concatStrings("[", $serie->getId(), "]", " - ", $serie->getTitle());
 
                     $options .= '<li class="list-group-item">' . $seriesPlatformOption . '</li>';
-                }else {
-                    $options .= $withoutOrInactiveRecords;
                 }
+            }
+            if($options == '') {
+                $options .= $withoutOrInactiveRecords;
             }
         }
 
         return $options;
     }
 
+     /**
+     * Obtiene el listado de series activas de un actor.
+     * @param int $actorId ID del actor.
+     * @return string Listado de opciones de menu para las series de un actor.
+     */
+    function getSeriesListByActor($actorId): string
+    {
+
+        $options = '';
+        $withoutOrInactiveRecords = '<li class="list-group-item">No se encontraron series</li>';
+
+        $actorSerieController = new ActorSerieController();
+
+        $directorSerieList = $actorSerieController->showByActorId($actorId);
+
+        if (is_bool($directorSerieList) && !$directorSerieList) {
+
+            $options .= $withoutOrInactiveRecords;
+        } else {
+            foreach ($directorSerieList as $directorSerieItem) {
+                if ($directorSerieItem->getStatus() == 1) {
+
+                    $serie = $this->showById($directorSerieItem->getSerieId());
+                    $seriesDirectorOption = Utilities::concatStrings("[", $serie->getId(), "]", " - ", $serie->getTitle());
+
+                    $options .= '<li class="list-group-item">' . $seriesDirectorOption . '</li>';
+                }
+            }
+            if($options == '') {
+                $options .= $withoutOrInactiveRecords;
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * Obtiene el listado de series activas de un director.
+     * @param int $directorId ID del director.
+     * @return string Listado de opciones de menu para las series de un director.
+     */
+    function getSeriesListByDirector($directorId): string
+    {
+
+        $options = '';
+        $withoutOrInactiveRecords = '<li class="list-group-item">No se encontraron series</li>';
+
+        $directorSerieController = new DirectorSerieController();
+
+        $directorSerieList = $directorSerieController->showByDirectorId($directorId);
+
+        if (is_bool($directorSerieList) && !$directorSerieList) {
+
+            $options .= $withoutOrInactiveRecords;
+        } else {
+            foreach ($directorSerieList as $directorSerieItem) {
+                if ($directorSerieItem->getStatus() == 1) {
+
+                    $serie = $this->showById($directorSerieItem->getSerieId());
+                    $seriesDirectorOption = Utilities::concatStrings("[", $serie->getId(), "]", " - ", $serie->getTitle());
+
+                    $options .= '<li class="list-group-item">' . $seriesDirectorOption . '</li>';
+                }
+            }
+            if($options == '') {
+                $options .= $withoutOrInactiveRecords;
+            }
+        }
+
+        return $options;
+    }
 
     /**
      * Construye un objeto Serie.
@@ -229,6 +312,7 @@ class SerieController
     {
         $platformIds = $serieData[self::SERIE_PLATFORMS];
         $actorIds = $serieData[self::SERIE_ACTORS];
+        $directorIds = $serieData[self::SERIE_DIRECTORS];
 
         if (!$this->editPlatformSeries($serieId, $platformIds)) {
             error_log("[SerieController] [Data Error] Falló al actualizar las plataformas de la serie - Id: [{$serieId}]");
@@ -237,6 +321,11 @@ class SerieController
 
         if (!$this->editActorSeries($serieId, $actorIds)) {
             error_log("[SerieController] [Data Error] Falló al actualizar los actores/actrices de la serie - Id: [{$serieId}]");
+            return false;
+        }
+
+        if (!$this->editDirectorSeries($serieId, $directorIds)) {
+            error_log("[SerieController] [Data Error] Falló al actualizar los/as directores/as de la serie - Id: [{$serieId}]");
             return false;
         }
 
@@ -289,6 +378,30 @@ class SerieController
     {
         $actorSerieController = new ActorSerieController();
         return $actorSerieController->edit($serieId, $actorIds);
+    }
+
+/**
+     * Crea registros para los/as directores/as de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $directorIds IDs de los directores/as de la serie.
+     * @return bool True si la creación fue exitosa, false si falló.
+     */
+    private function createDirectorSeries(int $serieId, array $directorIds): bool
+    {
+        $directorSerieController = new DirectorSerieController();
+        return $directorSerieController->create($serieId, $directorIds);
+    }
+
+    /**
+     * Edita registros para los/as directores/as de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $directorIds IDs de los/as directores/as de la serie.
+     * @return bool True si la edición fue exitosa, false si falló.
+     */
+    private function editDirectorSeries(int $serieId, array $directorIds): bool
+    {
+        $directorSerieController = new DirectorSerieController();
+        return $directorSerieController->edit($serieId, $directorIds);
     }
 
     /**
