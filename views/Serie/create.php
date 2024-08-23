@@ -18,7 +18,8 @@ if ($sendData) {
         'synopsis' => $_POST['synopsis'],
         'release_date' => $_POST['releaseDate'],
         'platforms' => $_POST['platformsSelect'],
-        'actors' => $_POST['actorsSelect']
+        'actors' => $_POST['actorsSelect'],
+        'directors' => $_POST['directorsSelect']
     ];
 
     $serieController->create($serieData);
@@ -146,6 +147,31 @@ if ($sendData) {
                             $actorOption = Utilities::concatStrings("[", $person->getId(), "]", " - " ,$person->getFirstName() , " ", $person->getLastName());
                         ?>
                             <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $actorOption; ?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="directores">Directores/as <span class="required">*</span></label>
+                    <select class="form-control" id="directores" name="directorsSelect[]" multiple required>
+                        <option selected>Seleccione...</option>
+                        <?php
+
+                        require_once '../../controllers/DirectorController.php';
+
+                        $directorController = new DirectorController();
+
+                        $directorList = $directorController->showAllDirectors();
+
+                        foreach ($directorList as $item) {
+                            $person = $directorController->showPersonById($item->getPersonId());
+                            $directorOption = Utilities::concatStrings("[", $person->getId(), "]", " - " ,$person->getFirstName() , " ", $person->getLastName());
+                        ?>
+                            <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $directorOption; ?></option>
                         <?php
                         }
                         ?>

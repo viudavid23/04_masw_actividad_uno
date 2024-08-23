@@ -4,9 +4,11 @@ require_once '../../utils/SessionStart.php';
 require_once '../../controllers/SerieController.php';
 require_once('../../controllers/PlatformSerieController.php');
 require_once('../../controllers/ActorSerieController.php');
+require_once('../../controllers/DirectorSerieController.php');
 
 $platformSerieController = new PlatformSerieController;
 $actorSerieController = new ActorSerieController;
+$directorSerieController = new DirectorSerieController;
 $serieController = new SerieController();
 
 $sendData = false;
@@ -18,6 +20,8 @@ $serieSaved = $serieController->showById($serieId);
 if (!is_bool($serieSaved)) {
     $platformOptions = $platformSerieController->getPlatformOptions($serieId);
     $actorOptions = $actorSerieController->getActorSerieOptions($serieId);
+    $directorOptions = $directorSerieController->getDirectorSerieOptions($serieId);
+    
 } else {
     $errorOccurred = true;
 }
@@ -33,7 +37,8 @@ if ($sendData && !$errorOccurred) {
         'synopsis' => $_POST['synopsis'],
         'release_date' => $_POST['releaseDate'],
         'platforms' => $_POST['platformsSelect'],
-        'actors' => $_POST['actorsSelect']
+        'actors' => $_POST['actorsSelect'],
+        'directors' => $_POST['directorsSelect']
     ];
 
     if (!is_bool($serieSaved)) {
@@ -44,6 +49,7 @@ if ($sendData && !$errorOccurred) {
             $serieSaved = $serieController->showById($serieId);
             $platformOptions = $platformSerieController->getPlatformOptions($serieId);
             $actorOptions = $actorSerieController->getActorSerieOptions($serieId);
+            $directorOptions = $directorSerieController->getDirectorSerieOptions($serieId);
         }
     }
 }
@@ -180,6 +186,17 @@ if ($sendData && !$errorOccurred) {
                         <select id="actor" name="actorsSelect[]" multiple required>
                             <option value="Seleccione...">Seleccione...</option>
                             <?php echo $actorOptions; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="director">Directores/as<span class="required">*</span></label>
+
+                        <select id="director" name="directorsSelect[]" multiple required>
+                            <option value="Seleccione...">Seleccione...</option>
+                            <?php echo $directorOptions; ?>
                         </select>
                     </div>
                 </div>
