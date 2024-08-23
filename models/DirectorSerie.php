@@ -24,11 +24,31 @@ class DirectorSerie
         }
     }
 
+
     public function getBySerieId(): mixed
     {
         $dbManager = new DBManager();
         $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_SERIE_ID));
         $stmt->bind_param('i', $this->serieId);
+        $stmt->execute();
+        $resultSet = $stmt->get_result();
+        $listData = [];
+
+        foreach ($resultSet as $item) {
+            $directorSerie = new DirectorSerie($item[self::COLUMN_DIRECTOR_ID], $item[self::COLUMN_SERIE_ID], $item[self::COLUMN_STATUS]);
+            array_push($listData, $directorSerie);
+        }
+
+        $this->cleanConnection($stmt, $dbManager);
+
+        return $listData;
+    }
+
+    public function getByDirectorId(): mixed
+    {
+        $dbManager = new DBManager();
+        $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_DIRECTOR_ID));
+        $stmt->bind_param('i', $this->directorId);
         $stmt->execute();
         $resultSet = $stmt->get_result();
         $listData = [];
