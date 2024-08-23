@@ -46,7 +46,7 @@
                                 $platform = $platformController->showById($platform->getId());
                                 $platform->setReleaseDate(Utilities::changeDateFormat($platform->getReleaseDate(), Constants::DATE_OUTPUT_FORMAT));
                                 $uniqueModalId = "deletePlatformModal" . $platform->getId();
-                                $seriesModalId = "seriesPlatformModal" . $platform->getId();
+                                $platformsModalId = "seriesPlatformModal" . $platform->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $platform->getId(); ?></td>
@@ -69,7 +69,7 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            Está acción eliminará la plataforma y la relación se las series que se encuentren asociadas.
+                                                            Está acción eliminará la plataforma. Para proceder, no debe tener series asociadas.
                                                             ¿Desea continuar?
                                                         </div>
 
@@ -82,13 +82,13 @@
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
 
-                                                            <button class="btn btn-info" data-bs-target="#<?php echo $seriesModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
+                                                            <button class="btn btn-info" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
                                                         </div>
 
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="modal fade" id="<?php echo $seriesModalId; ?>" aria-hidden="true" aria-labelledby="platformSeriesLabel" tabindex="-1">
+                                            <div class="modal fade" id="<?php echo $platformsModalId; ?>" aria-hidden="true" aria-labelledby="platformSeriesLabel" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
