@@ -43,6 +43,25 @@ class ActorSerie
         return $listData;
     }
 
+    public function getByActorId(): mixed
+    {
+        $dbManager = new DBManager();
+        $stmt = $dbManager->queryPrepare($this->selectByColumnQuery(self::COLUMN_ACTOR_ID));
+        $stmt->bind_param('i', $this->actorId);
+        $stmt->execute();
+        $resultSet = $stmt->get_result();
+        $listData = [];
+
+        foreach ($resultSet as $item) {
+            $actorSerie = new ActorSerie($item[self::COLUMN_ACTOR_ID], $item[self::COLUMN_SERIE_ID], $item[self::COLUMN_STATUS]);
+            array_push($listData, $actorSerie);
+        }
+
+        $this->cleanConnection($stmt, $dbManager);
+
+        return $listData;
+    }
+
     public function save($actorIdsArray): bool
     {
         $created = false;
