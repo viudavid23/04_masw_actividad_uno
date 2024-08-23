@@ -55,6 +55,7 @@
                                 $director->setBeginningCareer(Utilities::changeDateFormat($director->getBeginningCareer(), Constants::DATE_OUTPUT_FORMAT));
                                 $country = $countryController->showById($person->getCountryId());
                                 $uniqueModalId = "deleteDirectorModal" . $director->getId();
+                                $directorsModalId = "seriesDirectorModal" . $director->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $director->getId(); ?></td>
@@ -72,31 +73,60 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $director->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#<?php echo $uniqueModalId; ?>">Eliminar</button>
                                             <!-- Modal Confirmación-->
-                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
+                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="modalTextLabel">Eliminación de Director/a <strong><?php echo $person->getFirstName() . " " . $person->getLastName(); ?></strong></h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            Está acción eliminará los/as directores/as de todas las series.
+                                                            Está acción eliminará el/la director/a. Para proceder, no debe tener series asociadas.
                                                             ¿Desea continuar?
                                                         </div>
+
                                                         <div class="modal-footer">
+
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
 
                                                             <form name="delete_director" action="delete.php" method="POST">
-                                                                <input type="hidden" name="serieId" value="<?php echo $director->getId(); ?>" />
+                                                                <input type="hidden" name="directorId" value="<?php echo $director->getId(); ?>" />
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
+
+                                                            <button class="btn btn-info" data-bs-target="#<?php echo $directorsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal fade" id="<?php echo $directorsModalId; ?>" aria-hidden="true" aria-labelledby="directorSeriesLabel" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="directorSeriesLabel">Series del director/a <strong><?php echo $person->getFirstName() . " " . $person->getLastName(); ?></strong></h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <ul class="list-group list-group-flush">
+                                                                <?php 
+                                                                    require_once '../../controllers/SerieController.php';
+
+                                                                    $serieController = new SerieController();
+                                                                    $seriesDirectorOptions = $serieController->getSeriesListByDirector($director->getId());
+                                                                    
+                                                                    echo $seriesDirectorOptions;
+                                                                ?>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-primary" data-bs-target="#<?php echo $uniqueModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Regresar</button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <a class="btn btn-danger" data-bs-toggle="modal" href="#<?php echo $uniqueModalId; ?>" role="button">Eliminar</a>
                                         </div>
                                     </td>
                                 </tr>

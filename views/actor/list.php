@@ -53,7 +53,8 @@
                                 $person = $actorController->showPersonById($actor->getPersonId());
                                 $person->setBirthdate(Utilities::changeDateFormat($person->getBirthdate(), Constants::DATE_OUTPUT_FORMAT));
                                 $country = $countryController->showById($person->getCountryId());
-                                $uniqueModalId = "deleteActorModal" . $actor->getId();
+                                $uniqueModalId = "deletePlatformModal" . $actor->getId();
+                                $seriesModalId = "seriesPlatformModal" . $actor->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $actor->getId(); ?></td>
@@ -71,30 +72,60 @@
                                             <a class="btn btn-success" href="edit.php?id=<?php echo $actor->getId(); ?>">Editar</a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Buttons Area">
-                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#<?php echo $uniqueModalId; ?>">Eliminar</button>
                                             <!-- Modal Confirmación-->
-                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
+                                            <div class="modal fade" id="<?php echo $uniqueModalId; ?>" aria-hidden="true" aria-labelledby="staticBackdropLabel" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="modalTextLabel">Eliminación de Actor/Actriz <strong><?php echo $actor->getStageName(); ?></strong></h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            Está acción eliminará los actores/actrices de todas las series.
+                                                            Está acción eliminará el actor/actriz. Para proceder, no debe tener series asociadas.
                                                             ¿Desea continuar?
                                                         </div>
+
                                                         <div class="modal-footer">
+
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
 
                                                             <form name="delete_actor" action="delete.php" method="POST">
                                                                 <input type="hidden" name="actorId" value="<?php echo $actor->getId(); ?>" />
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
+
+                                                            <button class="btn btn-info" data-bs-target="#<?php echo $seriesModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal fade" id="<?php echo $seriesModalId; ?>" aria-hidden="true" aria-labelledby="actorSeriesLabel" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="actorSeriesLabel">Series del actor/actriz <strong><?php echo $actor->getStageName(); ?></strong></h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <ul class="list-group list-group-flush">
+                                                                <?php 
+                                                                    require_once '../../controllers/SerieController.php';
+
+                                                                    $serieController = new SerieController();
+                                                                    $seriesActorOptions = $serieController->getSeriesListByActor($actor->getId());
+                                                                    
+                                                                    echo $seriesActorOptions;
+                                                                ?>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-primary" data-bs-target="#<?php echo $uniqueModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Regresar</button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <a class="btn btn-danger" data-bs-toggle="modal" href="#<?php echo $uniqueModalId; ?>" role="button">Eliminar</a>
                                         </div>
                                     </td>
                                 </tr>
