@@ -13,6 +13,7 @@
         <?php
         include '../../menu.php';
         require_once '../../controllers/DirectorController.php';
+        require_once '../../controllers/DirectorSerieController.php';
         ?>
         <div class="col-12">
             <h2 class="h2">Eliminación de Directores/as</h2>
@@ -20,10 +21,14 @@
 
             $id = $_POST['directorId'];
 
-            $directorController = new DirectorController();
+            $directorSerieController = new DirectorSerieController();
+            $hasActiveSeries = $directorSerieController->checkActiveDirectorSeries($id);
 
-            $directorController->deleteDirector($id);
-
+            if(!$hasActiveSeries) {
+                $directorController = new DirectorController();
+                $directorController->deleteDirector($id);
+            }
+            
             if (isset($_SESSION['error_message'])) {
             ?>
                 <div class="row">
