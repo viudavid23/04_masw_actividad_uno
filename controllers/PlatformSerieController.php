@@ -2,6 +2,7 @@
 require_once '../../utils/SessionStart.php';
 require_once '../../utils/Utilities.php';
 require_once('exceptions/RecordNotFoundException.php');
+require_once('validations/SerieValidation.php');
 require_once('../../models/PlatformSerie.php');
 require_once('PlatformController.php');
 class PlatformSerieController
@@ -67,7 +68,6 @@ class PlatformSerieController
         try {
             $this->checkValidSerieIdDataType($serieId);
             $this->checkValidPlatformSerieInputFields($platformIdsData);
-            $this->checkValidPlatform($platformIdsData);
 
             $model = new PlatformSerie(null, $serieId);
             $platformSerieSaved = $model->save($platformIdsData);
@@ -247,6 +247,27 @@ class PlatformSerieController
         }
 
         return $options;
+    }
+
+    function checkActivePlatformSeries($platformId): bool
+    {
+        $hasActiveSeries = false;
+
+        $platformSerieList = $this->showByPlatformId($platformId);
+
+        if (isset($platformSerieList) && !empty($platformSerieList)) {
+
+            foreach ($platformSerieList as $platformSerieItem) {
+                if ($platformSerieItem->getStatus() == 1) {
+                    error_log("No se puede eliminar la plataforma de la tabla platform, tiene series activas en la tabla platform_serie - PLATFORM_ID: {$platformId}");
+                    Utilities::setWarningMessage("La plataforma tiene series asociadas");
+                    $hasActiveSeries = true;
+                    break;
+                }
+            }
+        }
+
+        return $hasActiveSeries;
     }
 
 }
