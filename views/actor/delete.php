@@ -13,6 +13,7 @@
         <?php
         include '../../menu.php';
         require_once '../../controllers/ActorController.php';
+        require_once '../../controllers/ActorSerieController.php';
         ?>
         <div class="col-12">
             <h2 class="h2">Eliminación de Actores/Actrices</h2>
@@ -20,9 +21,13 @@
 
             $id = $_POST['actorId'];
 
-            $actorController = new ActorController();
+            $actorSerieController = new ActorSerieController();
+            $hasActiveSeries = $actorSerieController->checkActiveActorSeries($id);
 
-            $actorController->deleteActor($id);
+            if(!$hasActiveSeries) {
+                $actorController = new ActorController();
+                $actorController->deleteActor($id);
+            }
 
             if (isset($_SESSION['error_message'])) {
             ?>

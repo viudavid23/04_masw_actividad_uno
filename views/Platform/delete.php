@@ -13,6 +13,7 @@
         <?php
         include '../../menu.php';
         require_once '../../controllers/PlatformController.php';
+        require_once '../../controllers/PlatformSerieController.php';
         ?>
         <div class="col-12">
             <h2 class="h2">Eliminación de Plataformas</h2>
@@ -20,9 +21,13 @@
 
             $id = $_POST['platformId'];
 
-            $platformController = new PlatformController();
+            $platformSerieController = new PlatformSerieController();
+            $hasActiveSeries = $platformSerieController->checkActivePlatformSeries($id);
 
-            $platformController->delete($id);
+            if(!$hasActiveSeries) {
+                $platformController = new PlatformController();
+                $platformController->delete($id);
+            }
 
             if (isset($_SESSION['error_message'])) {
             ?>
