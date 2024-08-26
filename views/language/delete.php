@@ -13,6 +13,7 @@
         <?php
         include '../../menu.php';
         require_once '../../controllers/LanguageController.php';
+        require_once '../../controllers/LanguageSerieController.php';
         ?>
         <div class="col-12">
             <h2 class="h2">Eliminación de Idiomas</h2>
@@ -20,9 +21,15 @@
 
             $id = $_POST['languageId'];
 
-            $languageController = new LanguageController();
+            $languageSerieController = new LanguageSerieController();
+            $hasActiveSeries = $languageSerieController->checkActiveAvailableLanguageSeries($id);
 
-            $languageList = $languageController->delete($id);
+            if (!$hasActiveSeries) {
+                $languageController = new LanguageController();
+                $languageList = $languageController->delete($id);
+            }
+
+
 
             if (isset($_SESSION['error_message'])) {
             ?>
