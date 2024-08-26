@@ -8,6 +8,7 @@ require_once('validations/SerieValidation.php');
 require_once('PlatformSerieController.php');
 require_once('ActorSerieController.php');
 require_once('DirectorSerieController.php');
+require_once('LanguageSerieController.php');
 class SerieController
 {
     const SERIE_TITLE = 'title';
@@ -16,6 +17,8 @@ class SerieController
     const SERIE_PLATFORMS = 'platforms';
     const SERIE_ACTORS = 'actors';
     const SERIE_DIRECTORS = 'directors';
+    const SERIE_AUDIO_LANGUAGES = 'audio_languages';
+    const SERIE_SUBTITLE_LANGUAGES = 'subtitle_languages';
 
     function showAll(): array
     {
@@ -73,6 +76,7 @@ class SerieController
             $platformIds = $serieData[self::SERIE_PLATFORMS];
             $actorIds = $serieData[self::SERIE_ACTORS];
             $directorIds = $serieData[self::SERIE_DIRECTORS];
+            $languages = $this->matchLanguages(null, $serieData[self::SERIE_AUDIO_LANGUAGES], $serieData[self::SERIE_SUBTITLE_LANGUAGES]);
 
             $serieModel = new Serie(null, $title, $synopsis, $releaseDate);
             $serieSaved = $serieModel->save();
@@ -81,7 +85,7 @@ class SerieController
 
                 $serieId = $serieSaved->getId();
 
-                if ($this->createPlatformSeries($serieId, $platformIds) && $this->createActorSeries($serieId, $actorIds) && $this->createDirectorSeries($serieId, $directorIds)) {
+                if ($this->createPlatformSeries($serieId, $platformIds) && $this->createActorSeries($serieId, $actorIds) && $this->createDirectorSeries($serieId, $directorIds) && $this->createLanguageSeries($serieId, $languages)) {
 
                     Utilities::setSuccessMessage("Serie [{$title}] creada correctamente.");
                     return true;
@@ -89,8 +93,8 @@ class SerieController
 
                     $serieModel->delete($serieId);
 
-                    $platformIdsEncode = json_encode($platformIds);
-                    error_log("[SerieController] [Dependency Error] Falló al guardar la serie - Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Causado por las Plataformas: [{$platformIdsEncode}]");
+                    //$platformIdsEncode = json_encode($platformIds);
+                    error_log("[SerieController] [Dependency Error] Falló al guardar la serie - Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Causado por");
                     throw new RuntimeException("La Serie [{$title}] no se ha creado correctamente.", Constants::FAILED_DEPENDENCY_CODE);
                 }
             }
@@ -148,7 +152,7 @@ class SerieController
 
             $serieSaved = $this->showById($id);
 
-            if (is_bool($serieSaved) && !$serieSaved){
+            if (is_bool($serieSaved) && !$serieSaved) {
                 return $serieSaved;
             }
 
@@ -206,7 +210,7 @@ class SerieController
                     $options .= '<li class="list-group-item">' . $seriesPlatformOption . '</li>';
                 }
             }
-            if($options == '') {
+            if ($options == '') {
                 $options .= $withoutOrInactiveRecords;
             }
         }
@@ -214,7 +218,7 @@ class SerieController
         return $options;
     }
 
-     /**
+    /**
      * Obtiene el listado de series activas de un actor.
      * @param int $actorId ID del actor.
      * @return string Listado de opciones de menu para las series de un actor.
@@ -242,7 +246,7 @@ class SerieController
                     $options .= '<li class="list-group-item">' . $seriesDirectorOption . '</li>';
                 }
             }
-            if($options == '') {
+            if ($options == '') {
                 $options .= $withoutOrInactiveRecords;
             }
         }
@@ -278,7 +282,43 @@ class SerieController
                     $options .= '<li class="list-group-item">' . $seriesDirectorOption . '</li>';
                 }
             }
-            if($options == '') {
+            if ($options == '') {
+                $options .= $withoutOrInactiveRecords;
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * Obtiene el listado de series activas de una idioma.
+     * @param int $languageId ID del idioma.
+     * @return string Listado de opciones de menu para las series de un idioma.
+     */
+    function getSeriesListByLanguage($languageId): string
+    {
+
+        $options = '';
+        $withoutOrInactiveRecords = '<li class="list-group-item">No se encontraron series</li>';
+
+        $languageSerieController = new LanguageSerieController();
+
+        $languageSerieList = $languageSerieController->showByLanguageId($languageId);
+
+        if (is_bool($languageSerieList) && !$languageSerieList) {
+
+            $options .= $withoutOrInactiveRecords;
+        } else {
+            foreach ($languageSerieList as $languageSerieItem) {
+                if ($languageSerieItem->getAudio() == 1 || $languageSerieItem->getSubtitle() == 1) {
+
+                    $serie = $this->showById($languageSerieItem->getSerieId());
+                    $seriesLanguageOption = Utilities::concatStrings("[", $serie->getId(), "]", " - ", $serie->getTitle());
+
+                    $options .= '<li class="list-group-item">' . $seriesLanguageOption . '</li>';
+                }
+            }
+            if ($options == '') {
                 $options .= $withoutOrInactiveRecords;
             }
         }
@@ -313,6 +353,7 @@ class SerieController
         $platformIds = $serieData[self::SERIE_PLATFORMS];
         $actorIds = $serieData[self::SERIE_ACTORS];
         $directorIds = $serieData[self::SERIE_DIRECTORS];
+        $languages = $this->matchLanguages($serieId, $serieData[self::SERIE_AUDIO_LANGUAGES], $serieData[self::SERIE_SUBTITLE_LANGUAGES]);
 
         if (!$this->editPlatformSeries($serieId, $platformIds)) {
             error_log("[SerieController] [Data Error] Falló al actualizar las plataformas de la serie - Id: [{$serieId}]");
@@ -326,6 +367,11 @@ class SerieController
 
         if (!$this->editDirectorSeries($serieId, $directorIds)) {
             error_log("[SerieController] [Data Error] Falló al actualizar los/as directores/as de la serie - Id: [{$serieId}]");
+            return false;
+        }
+
+        if (!$this->editLanguageSeries($serieId, $languages)) {
+            error_log("[SerieController] [Data Error] Falló al actualizar los idiomas disponibles de la serie - Id: [{$serieId}]");
             return false;
         }
 
@@ -380,7 +426,7 @@ class SerieController
         return $actorSerieController->edit($serieId, $actorIds);
     }
 
-/**
+    /**
      * Crea registros para los/as directores/as de una serie.
      * @param int $serieId EL ID de la serie.
      * @param array $directorIds IDs de los directores/as de la serie.
@@ -402,6 +448,30 @@ class SerieController
     {
         $directorSerieController = new DirectorSerieController();
         return $directorSerieController->edit($serieId, $directorIds);
+    }
+
+    /**
+     * Crea registros para los idiomas de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $languages Idiomas de la serie.
+     * @return bool True si la creación fue exitosa, false si falló.
+     */
+    private function createLanguageSeries(int $serieId, array $languages): bool
+    {
+        $languageSerieController = new LanguageSerieController();
+        return $languageSerieController->create($serieId, $languages);
+    }
+
+    /**
+     * Edita registros para los idiomas de una serie.
+     * @param int $serieId EL ID de la serie.
+     * @param array $languages Idiomas de la serie.
+     * @return bool True si la edición fue exitosa, false si falló.
+     */
+    private function editLanguageSeries(int $serieId, array $languages): bool
+    {
+        $languageSerieController = new LanguageSerieController();
+        return $languageSerieController->edit($serieId, $languages);
     }
 
     /**
@@ -447,5 +517,41 @@ class SerieController
         if ($inputInvalid) {
             throw new InvalidArgumentException("Por favor verificar la información ingresada.", Constants::BAD_REQUEST_CODE);
         }
+    }
+
+    private function matchLanguages($serieId, array $audioLanguages, array $subtitleLanguages): array
+    {
+        $languages = [];
+        
+        // Intersección de arrays - ambos componentes
+        $bothLanguages = array_intersect($audioLanguages, $subtitleLanguages);
+        $languages = array_fill_keys($bothLanguages, ['audio' => 1, 'subtitle' => 1]);
+        
+        // Diferencias de arrays - solo audio
+        $onlyAudioLanguage = array_diff($audioLanguages, $subtitleLanguages);
+        $languages += array_fill_keys($onlyAudioLanguage, ['audio' => 1, 'subtitle' => 0]);
+        
+        // Diferencias de arrays - solo subtítulos
+        $onlySubtitleLanguage = array_diff($subtitleLanguages, $audioLanguages);
+        $languages += array_fill_keys($onlySubtitleLanguage, ['audio' => 0, 'subtitle' => 1]);
+
+        // Detectar idiomas que han sido removidos de ambos arrays
+        if ($serieId != null) {
+            $languageSerieController = new LanguageSerieController();
+
+            $savedSerieLanguages = $languageSerieController->showBySerieId($serieId);
+            $savedIdsSerieLanguages = [];
+            foreach ($savedSerieLanguages as $savedSerieLanguageItem) {
+                $savedIdsSerieLanguages[] = $savedSerieLanguageItem->getLanguageId();
+            }
+
+            foreach ($savedIdsSerieLanguages as $languageId) {
+                if (!in_array($languageId, $audioLanguages) && !in_array($languageId, $subtitleLanguages)) {
+                    $languages[$languageId] = ['audio' => 0, 'subtitle' => 0];
+                }
+            }
+        }
+
+        return $languages;
     }
 }
