@@ -19,7 +19,9 @@ if ($sendData) {
         'release_date' => $_POST['releaseDate'],
         'platforms' => $_POST['platformsSelect'],
         'actors' => $_POST['actorsSelect'],
-        'directors' => $_POST['directorsSelect']
+        'directors' => $_POST['directorsSelect'],
+        'audio_languages' => $_POST['audioLanguagesSelect'],
+        'subtitle_languages' => $_POST['subtitleLanguagesSelect']
     ];
 
     $serieController->create($serieData);
@@ -172,6 +174,56 @@ if ($sendData) {
                             $directorOption = Utilities::concatStrings("[", $person->getId(), "]", " - " ,$person->getFirstName() , " ", $person->getLastName());
                         ?>
                             <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $directorOption; ?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="idiomas">Idiomas Audio Disponibles <span class="required">*</span></label>
+                    <select class="form-control" id="idiomas" name="audioLanguagesSelect[]" multiple required>
+                        <option selected>Seleccione...</option>
+                        <?php
+
+                        require_once '../../controllers/LanguageController.php';
+
+                        $languageController = new LanguageController();
+
+                        $languageList = $languageController->showAll();
+                        //Remover opcion de No Aplica para idiomas de audio
+                        unset($languageList[0]);
+
+                        foreach ($languageList as $item) {
+                            $languageOption = Utilities::concatStrings("[", $item->getId(), "]", " - " ,$item->getName());
+                        ?>
+                            <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $languageOption; ?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="idiomas">Idiomas Subtítulos Disponibles <span class="required">*</span></label>
+                    <select class="form-control" id="idiomas" name="subtitleLanguagesSelect[]" multiple required>
+                        <option selected>Seleccione...</option>
+                        <?php
+
+                        require_once '../../controllers/LanguageController.php';
+
+                        $languageController = new LanguageController();
+
+                        $languageList = $languageController->showAll();
+
+                        foreach ($languageList as $item) {
+                            $languageOption = Utilities::concatStrings("[", $item->getId(), "]", " - " ,$item->getName());
+                        ?>
+                            <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $languageOption; ?></option>
                         <?php
                         }
                         ?>

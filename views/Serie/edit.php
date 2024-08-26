@@ -5,11 +5,13 @@ require_once '../../controllers/SerieController.php';
 require_once('../../controllers/PlatformSerieController.php');
 require_once('../../controllers/ActorSerieController.php');
 require_once('../../controllers/DirectorSerieController.php');
+require_once('../../controllers/LanguageSerieController.php');
 
 $platformSerieController = new PlatformSerieController;
 $actorSerieController = new ActorSerieController;
 $directorSerieController = new DirectorSerieController;
 $serieController = new SerieController();
+$languageSerieController = new LanguageSerieController();
 
 $sendData = false;
 $errorOccurred = false;
@@ -21,6 +23,8 @@ if (!is_bool($serieSaved)) {
     $platformOptions = $platformSerieController->getPlatformOptions($serieId);
     $actorOptions = $actorSerieController->getActorSerieOptions($serieId);
     $directorOptions = $directorSerieController->getDirectorSerieOptions($serieId);
+    $audioLanguageOptions = $languageSerieController->getAudioLanguageSerieOptions($serieId);
+    $subtitleLanguageOptions = $languageSerieController->getSubtitleLanguageSerieOptions($serieId);
     
 } else {
     $errorOccurred = true;
@@ -38,7 +42,9 @@ if ($sendData && !$errorOccurred) {
         'release_date' => $_POST['releaseDate'],
         'platforms' => $_POST['platformsSelect'],
         'actors' => $_POST['actorsSelect'],
-        'directors' => $_POST['directorsSelect']
+        'directors' => $_POST['directorsSelect'],
+        'audio_languages' => $_POST['audioLanguagesSelect'],
+        'subtitle_languages' => $_POST['subtitleLanguagesSelect']
     ];
 
     if (!is_bool($serieSaved)) {
@@ -50,6 +56,8 @@ if ($sendData && !$errorOccurred) {
             $platformOptions = $platformSerieController->getPlatformOptions($serieId);
             $actorOptions = $actorSerieController->getActorSerieOptions($serieId);
             $directorOptions = $directorSerieController->getDirectorSerieOptions($serieId);
+            $audioLanguageOptions = $languageSerieController->getAudioLanguageSerieOptions($serieId);
+            $subtitleLanguageOptions = $languageSerieController->getSubtitleLanguageSerieOptions($serieId);
         }
     }
 }
@@ -200,7 +208,25 @@ if ($sendData && !$errorOccurred) {
                         </select>
                     </div>
                 </div>
+                <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="idiomas">Idiomas Audio Disponibles <span class="required">*</span></label>
+                    <select class="form-control" id="idiomas" name="audioLanguagesSelect[]" multiple required>
+                        <option>Seleccione...</option>
+                        <?php echo $audioLanguageOptions; ?>
+                    </select>
+                </div>
+            </div>
 
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    <label for="idiomas">Idiomas Subtítulos Disponibles <span class="required">*</span></label>
+                    <select class="form-control" id="idiomas" name="subtitleLanguagesSelect[]" multiple required>
+                        <option>Seleccione...</option>
+                        <?php echo $subtitleLanguageOptions; ?>
+                    </select>
+                </div>
+            </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary" name="editBtn">Editar</button>
                     <a href="list.php" class="btn btn-danger">Cancelar</a>
