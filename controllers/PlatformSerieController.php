@@ -179,6 +179,33 @@ class PlatformSerieController
         return $serieDeleted;
     }
 
+    /**
+     * Obtiene el listado de plataformas activas de una serie.
+     * @param int $serieId ID de la serie.
+     * @return string Listado de opciones de menu para las plataformas de una serie.
+     */
+    function getPlatformListBySerie($serieId): string
+    {
+        $options = '';
+
+        $platformSerieList = $this->showBySerieId($serieId);
+
+        $platformController = new PlatformController();
+
+        foreach ($platformSerieList as $platformSerieItem) {
+            if ($platformSerieItem->getStatus() == 1) {
+
+                $platform = $platformController->showById($platformSerieItem->getPlatformId());
+
+                $platformSerieOption = Utilities::concatStrings("[", $platform->getId(), "]", " - ", $platform->getName());
+
+                $options .= '<li class="list-group-item">' . $platformSerieOption . '</li>';
+            }
+        }
+
+        return $options;
+    }
+
 
     private function checkValidPlatformSerieInputFields($platformIdsData): void
     {
@@ -249,6 +276,11 @@ class PlatformSerieController
         return $options;
     }
 
+    /**
+     * Valida las series activas de una plataforma.
+     * @param int $platformId ID de la plataforma.
+     * @return bool TRUE si la plataforma tiene series activas, FALSE si no
+     */
     function checkActivePlatformSeries($platformId): bool
     {
         $hasActiveSeries = false;
