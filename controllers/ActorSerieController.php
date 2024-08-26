@@ -128,33 +128,6 @@ class ActorSerieController
         }
     }
 
-    function delete($id): bool
-    {
-        $serieDeleted = false;
-
-        if (!$this->checkValidSerieIdDataType($id)) {
-            return $serieDeleted;
-        }
-
-        $model = new Serie($id);
-
-        $serieSaved = $model->getById();
-
-        if (!$serieSaved) {
-            error_log("[ActorSerieController] [Data Error] Serie no encontrada en la tabla actor_serie de la base de datos - SERIE_ID [{$id}]");
-            return $serieDeleted;
-        }
-
-        $serieDeleted = $model->delete();
-
-        if (!$serieDeleted) {
-            error_log("[ActorSerieController] [Data Error] Falló al eliminar la Serie en la tabla actor_serie - SERIE_ID [{$id}]");
-        }
-
-        return $serieDeleted;
-    }
-
-
     private function checkValidActorSerieInputFields($actorIdsData): void
     {
         $inputInvalid = false;

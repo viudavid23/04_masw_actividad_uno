@@ -128,33 +128,6 @@ class DirectorSerieController
         }
     }
 
-    function delete($id): bool
-    {
-        $serieDeleted = false;
-
-        if (!$this->checkValidSerieIdDataType($id)) {
-            return $serieDeleted;
-        }
-
-        $model = new Serie($id);
-
-        $serieSaved = $model->getById();
-
-        if (!$serieSaved) {
-            error_log("[DirectorSerieController] [Data Error] Serie no encontrada en la tabla director_serie de la base de datos - SERIE_ID [{$id}]");
-            return $serieDeleted;
-        }
-
-        $serieDeleted = $model->delete();
-
-        if (!$serieDeleted) {
-            error_log("[DirectorSerieController] [Data Error] Falló al eliminar la Serie en la tabla director_serie - SERIE_ID [{$id}]");
-        }
-
-        return $serieDeleted;
-    }
-
-
     private function checkValidDirectorSerieInputFields($directorIdsData): void
     {
         $inputInvalid = false;
