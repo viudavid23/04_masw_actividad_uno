@@ -113,11 +113,11 @@ class LanguageController
             Utilities::setWarningMessage("Idioma [{$id}] no registrado");
             return $languageDeleted;
         }
-
+        $languageName = $languageSaved->getName();
         $languageDeleted = $model->delete();
 
         if ($languageDeleted) {
-            Utilities::setSuccessMessage("Idioma eliminado correctamente.");
+            Utilities::setSuccessMessage("Idioma {$languageName} eliminado correctamente.");
         } else {
             error_log("Database exception: Fallo al eliminar el idioma - ID [{$id}]");
             Utilities::setErrorMessage("El Idioma no se ha eliminado correctamente.");
