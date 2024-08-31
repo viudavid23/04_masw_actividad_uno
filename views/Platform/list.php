@@ -82,29 +82,23 @@
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
 
-                                                            <button class="btn btn-info" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
-                                                        </div>
+                                                            <button class="btn btn-info" data-platform-id="<?php echo $platform->getId(); ?>" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
 
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Segundo Modal para Series Asociadas -->
                                             <div class="modal fade" id="<?php echo $platformsModalId; ?>" aria-hidden="true" aria-labelledby="platformSeriesLabel" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="platformSeriesLabel">Series de la plataforma <strong><?php echo $platform->getName(); ?></strong></h5>
+                                                            <h5 class="modal-title" id="platformSeriesLabel">Series Asociadas para <strong><?php echo $platform->getName(); ?></strong></h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <ul class="list-group list-group-flush">
-                                                                <?php 
-                                                                    require_once '../../controllers/SerieController.php';
-
-                                                                    $serieController = new SerieController();
-                                                                    $seriesPlatformOptions = $serieController->getSeriesListByPlatform($platform->getId());
-                                                                    
-                                                                    echo $seriesPlatformOptions;
-                                                                ?>
+                                                            <ul class="list-group list-group-flush" id="series-list-<?php echo $platform->getId(); ?>">
+                                                                <!-- El contenido se actualizará mediante AJAX -->
                                                             </ul>
                                                         </div>
                                                         <div class="modal-footer">
@@ -113,6 +107,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <a class="btn btn-danger" data-bs-toggle="modal" href="#<?php echo $uniqueModalId; ?>" role="button">Eliminar</a>
                                         </div>
                                     </td>
@@ -137,6 +132,26 @@
     <script src="../../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../../assets/js/popper.min.js"></script>
     <script src="../../assets/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.btn-info').on('click', function() {
+                var platformId = $(this).data('platform-id'); // Obtener el ID de la plataforma desde el botón
+
+                $.ajax({
+                    url: 'fetch_platform_series.php', // Este archivo PHP manejará la solicitud
+                    method: 'POST',
+                    data: {
+                        platformId: platformId
+                    },
+                    success: function(response) {
+                        $('#series-list-' + platformId).html(response); // Llenar la lista con la respuesta del servidor
+                        var modalId = '#seriesPlatformModal' + platformId;
+                        $('modalId').modal('show'); // Mostrar el segundo modal después de cargar los datos
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -95,12 +95,13 @@
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
 
-                                                            <button class="btn btn-info" data-bs-target="#<?php echo $directorsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
+                                                            <button class="btn btn-info" data-director-id="<?php echo $director->getId(); ?>" data-bs-target="#<?php echo $directorsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
                                                         </div>
 
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Segundo Modal para Series Asociadas -->
                                             <div class="modal fade" id="<?php echo $directorsModalId; ?>" aria-hidden="true" aria-labelledby="directorSeriesLabel" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
@@ -109,15 +110,8 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <ul class="list-group list-group-flush">
-                                                                <?php 
-                                                                    require_once '../../controllers/SerieController.php';
-
-                                                                    $serieController = new SerieController();
-                                                                    $seriesDirectorOptions = $serieController->getSeriesListByDirector($director->getId());
-                                                                    
-                                                                    echo $seriesDirectorOptions;
-                                                                ?>
+                                                            <ul class="list-group list-group-flush" id="series-list-<?php echo $director->getId(); ?>">
+                                                                <!-- El contenido se actualizará mediante AJAX -->
                                                             </ul>
                                                         </div>
                                                         <div class="modal-footer">
@@ -150,6 +144,26 @@
     <script src="../../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../../assets/js/popper.min.js"></script>
     <script src="../../assets/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.btn-info').on('click', function() {
+                var directorId = $(this).data('director-id'); // Obtener el ID de la plataforma desde el botón
+
+                $.ajax({
+                    url: 'fetch_director_series.php', // Este archivo PHP manejará la solicitud
+                    method: 'POST',
+                    data: {
+                        directorId: directorId
+                    },
+                    success: function(response) {
+                        $('#series-list-' + directorId).html(response); // Llenar la lista con la respuesta del servidor
+                        var modalId = '#seriesDirectorModal' + directorId;
+                        $('modalId').modal('show'); // Mostrar el segundo modal después de cargar los datos
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

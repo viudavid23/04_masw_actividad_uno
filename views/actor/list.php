@@ -54,7 +54,7 @@
                                 $person->setBirthdate(Utilities::changeDateFormat($person->getBirthdate(), Constants::DATE_OUTPUT_FORMAT));
                                 $country = $countryController->showById($person->getCountryId());
                                 $uniqueModalId = "deletePlatformModal" . $actor->getId();
-                                $seriesModalId = "seriesPlatformModal" . $actor->getId();
+                                $actorModalId = "seriesActorModal" . $actor->getId();
                             ?>
                                 <tr>
                                     <td><?php echo $actor->getId(); ?></td>
@@ -94,13 +94,14 @@
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
 
-                                                            <button class="btn btn-info" data-bs-target="#<?php echo $seriesModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
+                                                            <button class="btn btn-info" data-actor-id="<?php echo $actor->getId(); ?>" data-bs-target="#<?php echo $actorModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
                                                         </div>
 
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="modal fade" id="<?php echo $seriesModalId; ?>" aria-hidden="true" aria-labelledby="actorSeriesLabel" tabindex="-1">
+                                            <!-- Segundo Modal para Series Asociadas -->
+                                            <div class="modal fade" id="<?php echo $actorModalId; ?>" aria-hidden="true" aria-labelledby="actorSeriesLabel" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -108,15 +109,8 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <ul class="list-group list-group-flush">
-                                                                <?php 
-                                                                    require_once '../../controllers/SerieController.php';
-
-                                                                    $serieController = new SerieController();
-                                                                    $seriesActorOptions = $serieController->getSeriesListByActor($actor->getId());
-                                                                    
-                                                                    echo $seriesActorOptions;
-                                                                ?>
+                                                            <ul class="list-group list-group-flush" id="series-list-<?php echo $actor->getId(); ?>">
+                                                                <!-- El contenido se actualizará mediante AJAX -->
                                                             </ul>
                                                         </div>
                                                         <div class="modal-footer">
@@ -149,6 +143,26 @@
     <script src="../../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../../assets/js/popper.min.js"></script>
     <script src="../../assets/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.btn-info').on('click', function() {
+                var actorId = $(this).data('actor-id'); // Obtener el ID de la plataforma desde el botón
+
+                $.ajax({
+                    url: 'fetch_actor_series.php', // Este archivo PHP manejará la solicitud
+                    method: 'POST',
+                    data: {
+                        actorId: actorId
+                    },
+                    success: function(response) {
+                        $('#series-list-' + actorId).html(response); // Llenar la lista con la respuesta del servidor
+                        var modalId = '#seriesActorModal' + actorId;
+                        $('modalId').modal('show'); // Mostrar el segundo modal después de cargar los datos
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -80,12 +80,13 @@
                                                                 <input type="hidden" name="serieId" value="<?php echo $serie->getId(); ?>" />
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
-                                                            <button class="btn btn-info" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Plataformas Asociadas</button>
+                                                            <button class="btn btn-info" data-serie-id="<?php echo $serie->getId(); ?>" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
                                                         </div>
 
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Segundo Modal para Series Asociadas -->
                                             <div class="modal fade" id="<?php echo $platformsModalId; ?>" aria-hidden="true" aria-labelledby="platformSeriesLabel" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
@@ -94,15 +95,8 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <ul class="list-group list-group-flush">
-                                                                <?php
-                                                                require_once '../../controllers/PlatformSerieController.php';
-
-                                                                $platformSerieController = new PlatformSerieController();
-                                                                $seriesPlatformOptions = $platformSerieController->getPlatformListBySerie($serie->getId());
-
-                                                                echo $seriesPlatformOptions;
-                                                                ?>
+                                                            <ul class="list-group list-group-flush" id="platform-list-<?php echo $serie->getId(); ?>">
+                                                                <!-- El contenido se actualizará mediante AJAX -->
                                                             </ul>
                                                         </div>
                                                         <div class="modal-footer">
@@ -135,6 +129,26 @@
     <script src="../../assets/js/jquery-3.6.0.min.js"></script>
     <script src="../../assets/js/popper.min.js"></script>
     <script src="../../assets/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.btn-info').on('click', function() {
+                var serieId = $(this).data('serie-id'); // Obtener el ID de la plataforma desde el botón
+
+                $.ajax({
+                    url: 'fetch_series_platform.php', // Este archivo PHP manejará la solicitud
+                    method: 'POST',
+                    data: {
+                        serieId: serieId
+                    },
+                    success: function(response) {
+                        $('#platform-list-' + serieId).html(response); // Llenar la lista con la respuesta del servidor
+                        var modalId = '#seriesPlatformModal' + serieId;
+                        $('modalId').modal('show'); // Mostrar el segundo modal después de cargar los datos
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
