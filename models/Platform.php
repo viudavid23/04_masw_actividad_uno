@@ -74,7 +74,7 @@ class Platform
         return $platformSaved;
     }
 
-    public function checkByName(): bool
+    public function findMatchesByName(): bool
     {
 
         $dbManager = new DBManager();
@@ -113,13 +113,6 @@ class Platform
 
         if ($platformSaved && !$this->compareCurrentData($platformSaved)) {
             return true;
-        }
-
-        $alreadySaved = $this->checkByName($this->getName());
-
-        if ($alreadySaved) {
-            error_log("Database exception: El Nombre de la plataforma ya se encuentra en uso - Name [{$this->name}]");
-            return false;
         }
 
         $stmt = $dbManager->queryPrepare($this->updateQuery());
@@ -275,7 +268,7 @@ class Platform
 
     private function selectByColumnLikeQuery($column): string
     {
-        return "SELECT $column  FROM " . self::TABLE_NAME . " WHERE $column LIKE CONCAT(?, '%')";
+        return "SELECT $column FROM " . self::TABLE_NAME . " WHERE LOWER($column) LIKE CONCAT(?, '%')";
     }
 
     private function insertQuery(): string
