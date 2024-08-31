@@ -19,18 +19,18 @@ class PlatformController
         return $platformObjectArray;
     }
 
-    function showById($id): mixed
+    function showById($platformId): mixed
     {
-        if (!$this->checkValidIdDataType($id)) {
+        if ($this->checkInvalidIdDataType($platformId)) {
             return false;
         }
 
-        $model = new Platform($id);
+        $model = new Platform($platformId);
         $platformSaved = $model->getById();
 
         if (!$platformSaved) {
-            error_log("Database exception: ID de la plataforma no encontrado en la base de datos - [{$id}]");
-            Utilities::setWarningMessage("Plataforma [{$id}] no registrada");
+            error_log("[PlatformController] [Database exception] ID no encontrado en la tabla platform de la base de datos - [{$platformId}]");
+            Utilities::setWarningMessage("Plataforma [{$platformId}] no registrada");
             return false;
         }
 
@@ -39,10 +39,9 @@ class PlatformController
 
     function create($platformData): bool
     {
-        $platformSaved = false;
 
-        if ($this->checkValidInputFields($platformData, true)) {
-            return $platformSaved;
+        if ($this->checkInvalidInputFields($platformData) || $this->checkAlreadyRegisterInputPlatformName($platformData['name'])) {
+            return false;
         }
 
         $name = strtoupper($platformData['name']);
@@ -53,22 +52,21 @@ class PlatformController
         $model = new Platform(null, $name, $description, $releaseDate, $logo);
         $platformSaved = $model->save();
 
-        if ($platformSaved) {
-            $_SESSION['success_message'] = 'Plataforma creada correctamente.';
+        if (!$platformSaved) {
+            error_log("[PlatformController] [Database exception] Falló al registrar en la tabla platform de la base de datos - name: [{$name}] description: [{$description}] release_date: [{$releaseDate}] Logo [{$logo}]");
+            Utilities::setErrorMessage("La Plataforma [{$name}] no se ha creado correctamente.");
+            return false;
         } else {
-            $_SESSION['error_message'] = 'La Plataforma no se ha creado correctamente.';
-            error_log("Database exception: Falló al guardar la plataforma - Nombre [{$name}] Descripción [{$description}] Fecha Lanzamiento [{$releaseDate}] Logo [{$logo}]");
+            Utilities::setSuccessMessage("Plataforma [{$name}] creada correctamente.");
+            return true;
         }
-
-        return $platformSaved;
     }
 
-    function edit($id, $platformData): bool
+    function edit($platformId, $platformData): bool
     {
-        $platformEdited = false;
 
-        if (!$this->checkValidIdDataType($id) || $this->checkValidInputFields($platformData, false)) {
-            return $platformEdited;
+        if ($this->checkInvalidIdDataType($platformId) || $this->checkInvalidInputFields($platformData)) {
+            return false;
         }
 
         $name = strtoupper($platformData['name']);
@@ -76,49 +74,48 @@ class PlatformController
         $releaseDate = $platformData['releaseDate'];
         $logo = $platformData['logo'];
 
-        $model = new Platform($id, $name, $description, $releaseDate, $logo);
+        $model = new Platform($platformId, $name, $description, $releaseDate, $logo);
         $platformEdited = $model->update();
 
-        if ($platformEdited) {
-            $_SESSION['success_message'] = 'Plataforma editada correctamente.';
+        if (!$platformEdited) {
+            error_log("[PlatformController] [Database exception] Falló al actualizar la tabla platform de la base de datos - id: [{$platformId}] name: [{$name}] description: [{$platformData['description']}] release_date: [{$platformData['releaseDate']}] logo: [{$platformData['logo']}] ");
+            Utilities::setErrorMessage("La Plataforma [{$name}] no se ha editado correctamente.");
+            return false;
         } else {
-            $_SESSION['error_message'] = 'La Plataforma no se ha editado correctamente.';
-            error_log("Database exception: Falló al actualizar la plataforma - ID [{$id}] Nombre [{$name}] Descripción [{$platformData['description']}] Fecha Lanzamiento [{$platformData['releaseDate']}] Logo [{$platformData['logo']}] ");
+            Utilities::setSuccessMessage("Plataforma [{$name}] editada correctamente.");
+            return true;
         }
-
-        return $platformEdited;
     }
 
-    function delete($id): bool
+    function delete($platformId): bool
     {
-        $platformDeleted = false;
 
-        if (!$this->checkValidIdDataType($id)) {
-            return $platformDeleted;
+        if ($this->checkInvalidIdDataType($platformId)) {
+            return false;
         }
 
-        $model = new Platform($id);
+        $model = new Platform($platformId);
 
         $platformSaved = $model->getById();
 
         if (!$platformSaved) {
-            $_SESSION['warning_message'] = "Plataforma [{$id}] no registrada";
-            return $platformDeleted;
+            Utilities::setWarningMessage("Plataforma [{$platformId}] no registrada");
+            return false;
         }
 
         $platformDeleted = $model->delete();
 
-        if ($platformDeleted) {
-            $_SESSION['success_message'] = 'Plataforma eliminada correctamente.';
+        if (!$platformDeleted) {
+            error_log("[PlatformController] [Database exception] Falló al eliminar ID de la tabla platform de la base de datos - ID [{$platformId}]");
+            Utilities::setErrorMessage("La Plataforma [{$platformId}] no se ha eliminado correctamente.");
         } else {
-            $_SESSION['error_message'] = 'La Plataforma no se ha eliminado correctamente.';
-            error_log("Database exception: Falló al eliminar la plataforma - ID [{$id}]");
+            Utilities::setSuccessMessage("Plataforma [{$platformId}] eliminada correctamente.");
         }
 
         return $platformDeleted;
     }
 
-    function makePlatform(Platform $source): Platform
+    private function makePlatform(Platform $source): Platform
     {
         return new Platform(
             $source->getId(),
@@ -129,53 +126,55 @@ class PlatformController
         );
     }
 
-    function checkByName($name): bool
+    private function findMatchesByName($name): bool
     {
         $model = new Platform(null, $name);
-        $plarformExist = $model->checkByName();
+        $plarformExist = $model->findMatchesByName();
         return $plarformExist;
     }
 
-    function checkValidInputFields($platformData, $create): bool
+    private function checkInvalidInputFields($platformData): bool
     {
         $inputInvalid = false;
-        $inputAlreadyRegister = false;
 
         if (!empty($platformData['description']) && PlatformValidation::validateString($platformData['description'])) {
-            error_log("Validation exception: Descripción no es una cadena válida de carácteres alfabéticos - [{$platformData['description']}]");
+            error_log("[PlatformController] [Validation exception] Descripción no es una cadena válida de carácteres alfabéticos - [{$platformData['description']}]");
             $inputInvalid = true;
         }
 
         if (!empty($platformData['releaseDate']) && CommonValidation::isInvalidDate($platformData['releaseDate'])) {
-            error_log("Validation exception: Fecha de lanzamiento no cumple con un formato de fecha aceptado  - [{$platformData['releaseDate']}]");
+            error_log("[PlatformController] [Validation exception] Fecha de lanzamiento no cumple con un formato de fecha aceptado  - [{$platformData['releaseDate']}]");
             $inputInvalid = true;
         }
 
         if ($inputInvalid) {
-            $_SESSION['error_message'] = "Por favor verificar la información ingresada.";
+            Utilities::setErrorMessage("Por favor verificar la información ingresada.");
             return $inputInvalid;
-        }
-
-        if ($create) {
-            $inputAlreadyRegister = $this->checkByName($platformData['name']);
-
-            if ($inputAlreadyRegister) {
-                $_SESSION['warning_message'] = "El Nombre de la plataforma ya se encuentra en uso [{$platformData['name']}]";
-                error_log("Database exception: La plataforma ya se encuentra en uso - Nombre [{$platformData['name']}] Descripción [{$platformData['description']}] Fecha de Lanzamiento [{$platformData['releaseDate']}] ");
-                $inputInvalid = true;
-            }
         }
 
         return $inputInvalid;
     }
 
-    function checkValidIdDataType($id): bool
+    private function checkInvalidIdDataType($id): bool
     {
         if (PlatformValidation::isInvalidIdDataType($id)) {
-            $_SESSION['error_message'] = "Plataforma [{$id}] inválida";
-            error_log("Validation exception: ID de la plataforma inválido. Debe contener solo números - [{$id}]");
-            return false;
+            error_log("[PlatformController] [Validation exception] ID de la plataforma inválido. Debe contener solo números - [{$id}]");
+            Utilities::setErrorMessage("Plataforma [{$id}] inválida");
+            return true;
         }
-        return true;
+        return false;
+    }
+
+    private function checkAlreadyRegisterInputPlatformName($platformName): bool
+    {
+        $inputAlreadyRegister = $this->findMatchesByName($platformName);
+
+        if ($inputAlreadyRegister) {
+            error_log("[PlatformController] [Database exception] El campo name ya se encuentra registrado en la tabla platform de la base de datos - name [{$platformName}] ");
+            Utilities::setWarningMessage("La plataforma [{$platformName}] ya se encuentra en uso");
+            return true;
+        }
+
+        return false;
     }
 }
