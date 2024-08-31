@@ -258,7 +258,7 @@ class LanguageSerieController
 
         foreach ($languageList as $languageItem) {
             $languageId = $languageItem->getId();
-            $languageOption = Utilities::concatStrings("[", $languageId, "]", " - ", $languageItem->getName());
+            $languageOption = Utilities::concatStrings("[", $languageItem->getIsoCode(), "]", " - ", $languageItem->getName() . " (" . $languageItem->getIsoCode() .")");
 
             if (in_array($languageId, $selectedLanguageIds)) {
                 $options .= '<option value="' . $languageId . '" selected=' . $languageId . '>' . $languageOption . '</option>';
