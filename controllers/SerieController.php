@@ -73,10 +73,6 @@ class SerieController
             $title = strtoupper($serieData[self::SERIE_TITLE]);
             $synopsis = strtoupper($serieData[self::SERIE_SYNOPSIS]);
             $releaseDate = $serieData[self::SERIE_RELEASE_DATE];
-            $platformIds = $serieData[self::SERIE_PLATFORMS];
-            $actorIds = $serieData[self::SERIE_ACTORS];
-            $directorIds = $serieData[self::SERIE_DIRECTORS];
-            $languages = $this->matchLanguages(null, $serieData[self::SERIE_AUDIO_LANGUAGES], $serieData[self::SERIE_SUBTITLE_LANGUAGES]);
 
             $serieModel = new Serie(null, $title, $synopsis, $releaseDate);
             $serieSaved = $serieModel->save();
@@ -85,17 +81,18 @@ class SerieController
 
                 $serieId = $serieSaved->getId();
 
-                if ($this->createPlatformSeries($serieId, $platformIds) && $this->createActorSeries($serieId, $actorIds) && $this->createDirectorSeries($serieId, $directorIds) && $this->createLanguageSeries($serieId, $languages)) {
+                $serieComponentsCreated = $this->createSerieComponents($serieId, $serieData);
 
-                    Utilities::setSuccessMessage("Serie [{$title}] creada correctamente.");
-                    return true;
-                } else {
+                if (!$serieComponentsCreated) {
 
                     $serieModel->delete($serieId);
 
-                    //$platformIdsEncode = json_encode($platformIds);
-                    error_log("[SerieController] [Dependency Error] Falló al guardar la serie - Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Causado por");
+                    error_log("[SerieController] [Dependency Error] Falló al actualizar en la tabla serie - id: [{$serieId}] title: [{$title}] synopsis: [{$synopsis}] release_date: [{$releaseDate}] platform ids: [" . implode(',', $serieData[self::SERIE_PLATFORMS]) . "] actor ids: [" . implode(',', $serieData[self::SERIE_ACTORS]) . "] director ids: [" . implode(',', $serieData[self::SERIE_DIRECTORS]) . "] audio language ids: [" . implode(',', $serieData[self::SERIE_AUDIO_LANGUAGES]) . "] subtitle language ids: [" . implode(',', $serieData[self::SERIE_SUBTITLE_LANGUAGES]) . "]");
                     throw new RuntimeException("La Serie [{$title}] no se ha creado correctamente.", Constants::FAILED_DEPENDENCY_CODE);
+                } else {
+
+                    Utilities::setSuccessMessage("Serie [{$title}] creada correctamente.");
+                    return true;
                 }
             }
 
@@ -112,25 +109,25 @@ class SerieController
         }
     }
 
-    function edit($id, $serieData): bool
+    function edit($serieId, $serieData): bool
     {
         try {
 
-            $this->checkValidIdDataType($id);
+            $this->checkValidIdDataType($serieId);
             $this->checkValidInputFields($serieData);
 
             $title = strtoupper($serieData[self::SERIE_TITLE]);
             $synopsis = strtoupper($serieData[self::SERIE_SYNOPSIS]);
             $releaseDate = $serieData[self::SERIE_RELEASE_DATE];
 
-            $model = new Serie($id, $title, $synopsis, $releaseDate);
+            $model = new Serie($serieId, $title, $synopsis, $releaseDate);
             $serieEdited = $model->update();
 
             if ($serieEdited) {
-                $serieComponentsEdited = $this->updateSerieComponents($id, $serieData);
+                $serieComponentsEdited = $this->updateSerieComponents($serieId, $serieData);
 
                 if (!$serieComponentsEdited) {
-                    error_log("[SerieController] [Data Error] Falló al actualizar la tabla serie - Id: [{$id}] Titulo: [{$title}] Sinopsis: [{$synopsis}] Fecha Lanzamiento: [{$releaseDate}] Plataformas: " . implode(',', $serieData[self::SERIE_PLATFORMS]) . " Actores/Actrices: " . implode(',', $serieData[self::SERIE_ACTORS]) . " Directores/as: " . implode(',', $serieData[self::SERIE_DIRECTORS]));
+                    error_log("[SerieController] [Dependency Error] Falló al actualizar en la tabla serie - id: [{$serieId}] title: [{$title}] synopsis: [{$synopsis}] release_date: [{$releaseDate}] platform ids: [" . implode(',', $serieData[self::SERIE_PLATFORMS]) . "] actor ids: [" . implode(',', $serieData[self::SERIE_ACTORS]) . "] director ids: [" . implode(',', $serieData[self::SERIE_DIRECTORS]) . "] audio language ids: [" . implode(',', $serieData[self::SERIE_AUDIO_LANGUAGES]) . "] subtitle language ids: [" . implode(',', $serieData[self::SERIE_SUBTITLE_LANGUAGES]) . "]");
                     return false;
                 }
 
@@ -144,29 +141,29 @@ class SerieController
         }
     }
 
-    function delete($id): bool
+    function delete($serieId): bool
     {
         try {
 
-            $this->checkValidIdDataType($id);
+            $this->checkValidIdDataType($serieId);
 
-            $serieSaved = $this->showById($id);
+            $serieSaved = $this->showById($serieId);
 
             if (is_bool($serieSaved) && !$serieSaved) {
                 return $serieSaved;
             }
 
-            $model = new Serie($id);
+            $model = new Serie($serieId);
             $serieDeleted = $model->delete();
 
-            if ($serieDeleted) {
+            if (!$serieDeleted) {
 
-                Utilities::setSuccessMessage("Serie [{$id}] eliminada correctamente.");
-                return true;
+                error_log("[SerieController] [Data Error] Falló al eliminar registro de la tabla serie - SERIE ID [{$serieId}]");
+                throw new RuntimeException("La Serie [{$serieId}] no se ha eliminado correctamente.");
             }
 
-            error_log("[SerieController] [Data Error] Falló al eliminar registro de la tabla serie - ID [{$id}]");
-            throw new RuntimeException("La Serie [{$id}] no se ha eliminado correctamente.");
+            Utilities::setSuccessMessage("Serie [{$serieId}] eliminada correctamente.");
+            return true;
         } catch (RecordNotFoundException $e) {
             error_log("[SerieController] [Record Not Found Exception] Code: " . $e->getCode() . " - Message: " . $e->getMessage());
             Utilities::setWarningMessage($e->getMessage());
@@ -342,6 +339,45 @@ class SerieController
     }
 
     /**
+     * Crea los componentes de una serie: plataformas, actores, directores, idiomas de audio y subtitulos.
+     * 
+     * @param int $serieId El ID de la serie.
+     * @param array $serieData Los datos de la serie.
+     * @return bool True si la creación fue exitosa, false si falló.
+     */
+    private function createSerieComponents(int $serieId, array $serieData): bool
+    {
+
+        $platformIds = $serieData[self::SERIE_PLATFORMS];
+        $actorIds = $serieData[self::SERIE_ACTORS];
+        $directorIds = $serieData[self::SERIE_DIRECTORS];
+        $languages = $this->matchLanguages(null, $serieData[self::SERIE_AUDIO_LANGUAGES], $serieData[self::SERIE_SUBTITLE_LANGUAGES]);
+
+        if (!$this->createPlatformSeries($serieId, $platformIds)) {
+            error_log("[SerieController] [Data Error] Falló al crear las plataformas de la serie en la tabla platform_serie - SERIE ID: [{$serieId}]");
+            return false;
+        }
+
+        if (!$this->createActorSeries($serieId, $actorIds)) {
+            error_log("[SerieController] [Data Error] Falló al crear los actores/actrices de la serie en la tabla actor_serie - SERIE ID: [{$serieId}]");
+            return false;
+        }
+
+        if (!$this->createDirectorSeries($serieId, $directorIds)) {
+            error_log("[SerieController] [Data Error] Falló al crear los/as directores/as de la serie en la tabla director_serie - SERIE ID: [{$serieId}]");
+            return false;
+        }
+
+        if (!$this->createLanguageSeries($serieId, $languages)) {
+            error_log("[SerieController] [Data Error] Falló al crear los idiomas disponibles de la serie en la tabla language_serie - SERIE ID: [{$serieId}]");
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
      * Actualiza los componentes de una serie: plataformas, actores, directores, idiomas de audio y subtitulos.
      * 
      * @param int $serieId El ID de la serie.
@@ -356,22 +392,22 @@ class SerieController
         $languages = $this->matchLanguages($serieId, $serieData[self::SERIE_AUDIO_LANGUAGES], $serieData[self::SERIE_SUBTITLE_LANGUAGES]);
 
         if (!$this->editPlatformSeries($serieId, $platformIds)) {
-            error_log("[SerieController] [Data Error] Falló al actualizar las plataformas de la serie - Id: [{$serieId}]");
+            error_log("[SerieController] [Data Error] Falló al actualizar las plataformas de la serie en la tabla platform_serie - SERIE ID: [{$serieId}]");
             return false;
         }
 
         if (!$this->editActorSeries($serieId, $actorIds)) {
-            error_log("[SerieController] [Data Error] Falló al actualizar los actores/actrices de la serie - Id: [{$serieId}]");
+            error_log("[SerieController] [Data Error] Falló al actualizar los actores/actrices de la serie en la tabla actor_serie - SERIE ID: [{$serieId}]");
             return false;
         }
 
         if (!$this->editDirectorSeries($serieId, $directorIds)) {
-            error_log("[SerieController] [Data Error] Falló al actualizar los/as directores/as de la serie - Id: [{$serieId}]");
+            error_log("[SerieController] [Data Error] Falló al actualizar los/as directores/as de la serie en la tabla director_serie - SERIE ID: [{$serieId}]");
             return false;
         }
 
         if (!$this->editLanguageSeries($serieId, $languages)) {
-            error_log("[SerieController] [Data Error] Falló al actualizar los idiomas disponibles de la serie - Id: [{$serieId}]");
+            error_log("[SerieController] [Data Error] Falló al actualizar los idiomas disponibles de la serie en la tabla language_serie - SERIE ID: [{$serieId}]");
             return false;
         }
 
@@ -522,15 +558,15 @@ class SerieController
     private function matchLanguages($serieId, array $audioLanguages, array $subtitleLanguages): array
     {
         $languages = [];
-        
+
         // Intersección de arrays - ambos componentes
         $bothLanguages = array_intersect($audioLanguages, $subtitleLanguages);
         $languages = array_fill_keys($bothLanguages, ['audio' => 1, 'subtitle' => 1]);
-        
+
         // Diferencias de arrays - solo audio
         $onlyAudioLanguage = array_diff($audioLanguages, $subtitleLanguages);
         $languages += array_fill_keys($onlyAudioLanguage, ['audio' => 1, 'subtitle' => 0]);
-        
+
         // Diferencias de arrays - solo subtítulos
         $onlySubtitleLanguage = array_diff($subtitleLanguages, $audioLanguages);
         $languages += array_fill_keys($onlySubtitleLanguage, ['audio' => 0, 'subtitle' => 1]);
