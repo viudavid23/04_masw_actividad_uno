@@ -110,7 +110,7 @@ if ($sendData) {
             <div class="col-md-6">
                 <div class="form-group mb-4">
                     <label for="plataformas">Plataformas <span class="required">*</span></label>
-                    <select class="form-control" id="plataformas" name="platformsSelect[]" multiple required>
+                    <select class="form-select" id="plataformas" name="platformsSelect[]" multiple required>
                         <option selected>Seleccione...</option>
                         <?php
 
@@ -197,7 +197,7 @@ if ($sendData) {
                         unset($languageList[0]);
 
                         foreach ($languageList as $item) {
-                            $languageOption = Utilities::concatStrings("[", $item->getId(), "]", " - " ,$item->getName());
+                            $languageOption = Utilities::concatStrings("[", $item->getId(), "]", " - " ,$item->getName() . " (" . $item->getIsoCode() .")");
                         ?>
                             <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $languageOption; ?></option>
                         <?php
@@ -221,7 +221,7 @@ if ($sendData) {
                         $languageList = $languageController->showAll();
 
                         foreach ($languageList as $item) {
-                            $languageOption = Utilities::concatStrings("[", $item->getId(), "]", " - " ,$item->getName());
+                            $languageOption = Utilities::concatStrings("[", $item->getId(), "]", " - " ,$item->getName() . " (" . $item->getIsoCode() .")");
                         ?>
                             <option <?php echo 'value="' . $item->getid() . '"' ?>><?php echo $languageOption; ?></option>
                         <?php
