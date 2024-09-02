@@ -59,20 +59,17 @@ class ActorController extends PersonController
             $awards = $actorData['awards'];
             $height = $actorData['height'];
             $personId = $personSaved->getId();
-    
+
             $model = new Actor(null, strtoupper($stageName), $biography, $awards, $height, $personId);
-    
+
             $actorSaved = $model->save();
-    
-            if ($actorSaved) {
-    
-                Utilities::setSuccessMessage("La información del Actor/Actriz se ha registrado correctamente.");
-            }else{
 
-                $this->deletePerson($personId);
-
+            if (!$actorSaved) {
                 error_log("Database exception: Falló al guardar el actor - Nombre Artístico [{$stageName}] Altura [{$height}] ID Persona [{$personId}]");
+                $this->deletePerson($personId);
                 Utilities::setErrorMessage("La información del Actor/Actriz no se ha registrado correctamente.");
+            } else {
+                Utilities::setSuccessMessage("La información del Actor/Actriz se ha registrado correctamente.");
             }
         }
         return $actorSaved;
@@ -97,15 +94,12 @@ class ActorController extends PersonController
 
         $actorEdited = $model->update();
 
-        if ($actorEdited) {
-
-            $personEdited = $this->editPerson($personId, $personData);
-
-            $this->handlePersonEditedMessage($personEdited);
-            
-        }else{
+        if (!$actorEdited) {
             error_log("Database exception: Falló al editar el/la actor/actriz - Id: [{$actorId}] Nombre Artístico [{$stageName}] Altura [{$height}] ID Persona [{$personId}]");
             Utilities::setErrorMessage("Actor/Actriz no se ha actualizado correctamente.");
+        } else {
+            $personEdited = $this->editPerson($personId, $personData);
+            $this->handlePersonEditedMessage($personEdited);
         }
 
         return $actorEdited;
@@ -131,11 +125,11 @@ class ActorController extends PersonController
 
         $actorDeleted = $this->deletePerson($actorDeleted->getPersonId());
 
-        if ($actorDeleted) {
-            Utilities::setSuccessMessage("La información del Actor/Actriz se ha eliminado correctamente.");
-        }else {
+        if (!$actorDeleted) {
             error_log("Database exception: Falló al eliminar el/la actor/actriz - ID Actor/Actriz [{$id}]");
             Utilities::setErrorMessage("La información del Actor/Actriz no se ha eliminado correctamente.");
+        } else {
+            Utilities::setSuccessMessage("La información del Actor/Actriz se ha eliminado correctamente.");
         }
 
         return $actorDeleted;
@@ -143,21 +137,22 @@ class ActorController extends PersonController
 
     private function makeActor(Actor $source): Actor
     {
-       return new Actor(
+        return new Actor(
             $source->getId(),
             ucfirst(Utilities::convertCharacters(0, $source->getStageName())),
             Utilities::convertCharacters(0, $source->getBiography()),
             Utilities::convertCharacters(0, $source->getAwards()),
             $source->getHeight(),
             $source->getPersonId()
-       );
+        );
     }
 
-    private function handlePersonEditedMessage(bool $personEdited){
-        if ($personEdited) {
-            Utilities::setSuccessMessage("Actor/Actriz y Datos Personales se han actualizado correctamente");
-        } else {
+    private function handlePersonEditedMessage(bool $personEdited)
+    {
+        if (!$personEdited) {
             Utilities::setErrorMessage("Actor/Actriz actualizado, pero los datos personales no se han actualizado correctamente.");
+        } else {
+            Utilities::setSuccessMessage("Actor/Actriz y Datos Personales se han actualizado correctamente");
         }
     }
 
