@@ -207,7 +207,7 @@ if ($sendData && !$errorOccurred) {
                 <div class="col-md-6">
                     <div class="form-group mb-3">
                         <label for="talla">Talla<span class="required">*</span></label>
-                        <input type="number" class="form-control" id="talla" name="height" step="0.1" placeholder="Ingrese la talla" value="<?php echo $actorSaved->getHeight(); ?>">
+                        <input type="number" class="form-control" id="talla" name="height" step="0.01" placeholder="Ingrese la talla" value="<?php echo $actorSaved->getHeight(); ?>">
                     </div>
                 </div>
                 <div class="form-group mb-3">

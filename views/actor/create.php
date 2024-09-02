@@ -150,7 +150,7 @@ if ($sendData) {
             <div class="col-md-6">
                 <div class="form-group mb-3">
                     <label for="talla">Talla (mts)<span class="required">*</span></label>
-                    <input type="number" class="form-control" id="talla" name="height" step="0.1" placeholder="Ingrese la talla">
+                    <input type="number" class="form-control" id="talla" name="height" step="0.01" placeholder="Ingrese la talla">
                 </div>
             </div>
             <div class="form-group mb-3">
