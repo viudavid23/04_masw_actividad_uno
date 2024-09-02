@@ -80,7 +80,7 @@
                                                                 <input type="hidden" name="serieId" value="<?php echo $serie->getId(); ?>" />
                                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                                             </form>
-                                                            <button class="btn btn-info" data-serie-id="<?php echo $serie->getId(); ?>" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Series Asociadas</button>
+                                                            <button class="btn btn-info" data-serie-id="<?php echo $serie->getId(); ?>" data-bs-target="#<?php echo $platformsModalId; ?>" data-bs-toggle="modal" data-bs-dismiss="modal">Plataformas Asociadas</button>
                                                         </div>
 
                                                     </div>
