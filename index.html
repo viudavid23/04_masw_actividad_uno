@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Series Library</title>
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <div id="menu"></div>
+  </div>
+  <footer class="page-footer font-small blue">
+    <div class="footer-copyright text-center py-3"><strong>Actividad Uno</strong> Jose David Mejía Guzmán
+      <a href="/"> https://www.universidadviu.com/co/</a>
+    </div>
+  </footer>
+  <script src="assets/js/jquery-3.6.0.min.js"></script>
+  <script src="assets/js/popper.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $.ajax({
+        url: "menu.php",
+        success: function(data) {
+          $("#menu").html(data);
+        },
+        error: function(xhr, status, error) {
+          console.error("Error: " + status + ": " + error);
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
